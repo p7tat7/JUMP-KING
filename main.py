@@ -6,37 +6,87 @@ import setting
 class MainCharacter(pygame.sprite.Sprite):
     def __init__(self, x, y, size, jump_h, walk_s):
         pygame.sprite.Sprite.__init__(self)
-        self.images = []
-        self.idle_img_index = -1
+        self.idle_images = []
+        self.move_images = []
+        self.jump_images = []
+        self.drop_images = []
+        self.move_frame = 0
         for file_index, file in enumerate(os.listdir(setting.character_images_path)):
-            img = pygame.image.load(os.path.join(setting.character_images_path, file)).convert()
-            img = pygame.transform.scale(img, (size[0], size[1]))
-            img.convert_alpha()
-            img.set_colorkey((0, 0, 0))
-            self.images.append(img)
-            if file == setting.idle_img_name:
-                self.idle_img_index = file_index
+            ori_path = os.path.join(setting.character_images_path, file)
+            if os.path.isfile(ori_path):
+                img = pygame.image.load(ori_path).convert()
+                img = pygame.transform.scale(img, (size[0], size[1]))
+                img.set_colorkey((0, 0, 0))
+                self.idle_images.append(img)
+            if os.path.isdir(ori_path):
+                for image in os.listdir(ori_path):
+                    path = os.path.join(ori_path, image)
+                    img = pygame.image.load(path).convert()
+                    img = pygame.transform.scale(img, (size[0], size[1]))
+                    img.set_colorkey((0, 0, 0))
 
-        self.image = self.images[self.idle_img_index]
+                    if ori_path == setting.character_move_ani:
+                        self.move_images.append(img)
+                    elif ori_path == setting.character_jump_ani:
+                        self.jump_images.append(img)
+                    elif ori_path == setting.character_drop_ani:
+                        self.drop_images.append(img)
+
+        self.image = self.idle_images[0]
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.speed = walk_s
         self.jump = jump_h
 
-        self.direction = 'right'
+        self.left = False
+        self.right = True
+        self.moving = False
+
 
     def update(self):
         key_press = pygame.key.get_pressed()
+
+        if not self.moving:
+            self.image = self.idle_images[0]
+            if self.left:
+                self.image = pygame.transform.flip(self.image, True, False)
+
+
         if key_press[pygame.K_a]:
+            self.moving = True
             self.rect.x -= self.speed
-            if self.direction != 'left':
-                self.image = pygame.transform.flip(self.image, True, False)
-                self.direction = 'left'
+
+            self.move_frame = self.move_frame + 1
+            if self.move_frame >= len(self.move_images):
+                self.move_frame = 0
+            self.moving_animation()
+            if self.right:
+                #self.image = pygame.transform.flip(self.image, True, False)
+                self.left = True
+                self.right = False
+            self.moving = False
+
         if key_press[pygame.K_d]:
+            self.moving = True
             self.rect.x += self.speed
-            if self.direction != 'right':
-                self.image = pygame.transform.flip(self.image, True, False)
-                self.direction = 'right'
+
+            self.move_frame = self.move_frame + 1
+            if self.move_frame >= len(self.move_images):
+                self.move_frame = 0
+            self.moving_animation()
+            if self.left:
+                #self.image = pygame.transform.flip(self.image, True, False)
+                self.left = False
+                self.right = True
+            self.moving = False
+
+
+
+    def moving_animation(self):
+        self.image = self.move_images[self.move_frame]
+        if self.left:
+            self.image = pygame.transform.flip(self.image, True, False)
+
 
 
 
