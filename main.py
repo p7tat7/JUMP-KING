@@ -68,7 +68,7 @@ class MainCharacter(pygame.sprite.Sprite):
         if key_press[pygame.K_SPACE] and self.in_ground:
             self.hold_keys[pygame.K_SPACE][1] += 1
             self.charging = True
-            self.image = pygame.transform.flip(self.drop_images[0], self.left, False)
+            self.image = pygame.transform.flip(self.jump_images[0], self.left, False)
 
         if key_press[pygame.K_a] and self.in_ground:
             self.hold_keys[pygame.K_a][1] += 1
@@ -79,9 +79,9 @@ class MainCharacter(pygame.sprite.Sprite):
                 self.rect.x -= self.speed
 
                 # next frame
-                self.move_frame = (self.move_frame + 1) % len(self.move_images)
+                self.move_frame = self.move_frame + 1
 
-                self.moving_animation()
+                self.moving_animation((self.move_frame // 10) % len(self.move_images))
                 self.moving = False
 
         if key_press[pygame.K_d] and self.in_ground:
@@ -93,9 +93,9 @@ class MainCharacter(pygame.sprite.Sprite):
                 self.rect.x += self.speed
 
                 # next frame
-                self.move_frame = (self.move_frame + 1) % len(self.move_images)
+                self.move_frame = self.move_frame + 1
 
-                self.moving_animation()
+                self.moving_animation((self.move_frame // 10) % len(self.move_images))
                 self.moving = False
 
 
@@ -132,8 +132,8 @@ class MainCharacter(pygame.sprite.Sprite):
 
 
 
-    def moving_animation(self):
-        self.image = pygame.transform.flip(self.move_images[self.move_frame], self.left, False)
+    def moving_animation(self, frame):
+        self.image = pygame.transform.flip(self.move_images[frame], self.left, False)
 
 
 
