@@ -6,6 +6,15 @@ import setting
 class MainCharacter(pygame.sprite.Sprite):
     def __init__(self, x, y, size, jump_h, walk_s):
         pygame.sprite.Sprite.__init__(self)
+
+        # index 0 = last frame, index 1 = current frame
+        # The number inside means hold for how many frames
+        self.hold_keys = {
+            pygame.K_SPACE: [0, 0],
+            pygame.K_a: [0, 0],
+            pygame.K_d: [0, 0]
+        }
+
         self.idle_images = []
         self.move_images = []
         self.jump_images = []
@@ -41,62 +50,101 @@ class MainCharacter(pygame.sprite.Sprite):
         self.left = False
         self.right = True
         self.moving = False
+        self.in_ground = True
+        self.charging = False
 
 
     def update(self):
         key_press = pygame.key.get_pressed()
 
-        if not self.moving:
-            self.image = self.idle_images[0]
-            if self.left:
-                self.image = pygame.transform.flip(self.image, True, False)
+        if not self.in_ground:
+            # TODO: jumping, find next position
+            pass
+
+        if not self.moving and self.in_ground and not self.charging:
+            self.image = pygame.transform.flip(self.idle_images[0], self.left, False)
 
 
-        if key_press[pygame.K_a]:
-            self.moving = True
-            self.rect.x -= self.speed
+        if key_press[pygame.K_SPACE] and self.in_ground:
+            self.hold_keys[pygame.K_SPACE][1] += 1
+            self.charging = True
+            self.image = pygame.transform.flip(self.drop_images[0], self.left, False)
 
-            self.move_frame = self.move_frame + 1
-            if self.move_frame >= len(self.move_images):
-                self.move_frame = 0
-            self.moving_animation()
-            if self.right:
-                #self.image = pygame.transform.flip(self.image, True, False)
-                self.left = True
-                self.right = False
-            self.moving = False
+        if key_press[pygame.K_a] and self.in_ground:
+            self.hold_keys[pygame.K_a][1] += 1
+            self.left = True
+            self.right = False
+            if not self.charging:
+                self.moving = True
+                self.rect.x -= self.speed
 
-        if key_press[pygame.K_d]:
-            self.moving = True
-            self.rect.x += self.speed
+                # next frame
+                self.move_frame = (self.move_frame + 1) % len(self.move_images)
 
-            self.move_frame = self.move_frame + 1
-            if self.move_frame >= len(self.move_images):
-                self.move_frame = 0
-            self.moving_animation()
-            if self.left:
-                #self.image = pygame.transform.flip(self.image, True, False)
-                self.left = False
-                self.right = True
-            self.moving = False
+                self.moving_animation()
+                self.moving = False
+
+        if key_press[pygame.K_d] and self.in_ground:
+            self.hold_keys[pygame.K_d][1] += 1
+            self.left = False
+            self.right = True
+            if not self.charging:
+                self.moving = True
+                self.rect.x += self.speed
+
+                # next frame
+                self.move_frame = (self.move_frame + 1) % len(self.move_images)
+
+                self.moving_animation()
+                self.moving = False
+
+
+        print(self.hold_keys) #DEBUG
+        for key, hold_key in self.hold_keys.items():
+            if hold_key[0] == hold_key[1] and hold_key[0] != 0:
+                # just release the key
+                if key == pygame.K_SPACE:
+                    # start jumping
+                    direction = 0
+                    if self.hold_keys[pygame.K_a][1] > 0 and self.hold_keys[pygame.K_d][1] > 0:
+                        # jump
+                        direction = 0
+                    elif self.hold_keys[pygame.K_a][1] > 0:
+                        # left jump
+                        direction = -1
+                    elif self.hold_keys[pygame.K_d][1] > 0:
+                        # right jump
+                        direction = 1
+
+                    print("jump (direction: " + str(direction) + ", holding time: " + str(hold_key[0]) + ")") #DEBUG
+
+                    self.charging = False
+
+                    # TODO
+                    # self.in_ground = False
+
+                # didn't press anymore, so reset it
+                self.hold_keys[key] = [0, 0]
+            else:
+                # pressing, update it
+                hold_key[0] = hold_key[1]
+        
 
 
 
     def moving_animation(self):
-        self.image = self.move_images[self.move_frame]
-        if self.left:
-            self.image = pygame.transform.flip(self.image, True, False)
+        self.image = pygame.transform.flip(self.move_images[self.move_frame], self.left, False)
 
 
 
 
 def main():
 
-    #Init
+    # Init
     pygame.init()
     clock = pygame.time.Clock()
 
-    #Create Screen
+    # Create Screen
     game_screen = pygame.display.set_mode(setting.screen_size)
 
     # Create Character
