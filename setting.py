@@ -10,6 +10,7 @@ stage_images_path = "stage_png"
 
 
 # Character Settings
+frame_rate = 100
 character_size = [50, 70]
 walking_speed = 3
 jumping_height = 0

@@ -53,6 +53,8 @@ class MainCharacter(pygame.sprite.Sprite):
         self.in_ground = True
         self.charging = False
 
+        self.last_update = pygame.time.get_ticks()
+        self.frame_rate = setting.frame_rate
 
     def update(self):
         key_press = pygame.key.get_pressed()
@@ -61,7 +63,7 @@ class MainCharacter(pygame.sprite.Sprite):
             # TODO: jumping, find next position
             pass
 
-        if not self.moving and self.in_ground and not self.charging:
+        if not key_press[pygame.K_a] and not key_press[pygame.K_d] and self.in_ground and not self.charging:
             self.image = pygame.transform.flip(self.idle_images[0], self.left, False)
 
 
@@ -75,29 +77,18 @@ class MainCharacter(pygame.sprite.Sprite):
             self.left = True
             self.right = False
             if not self.charging:
-                self.moving = True
                 self.rect.x -= self.speed
 
-                # next frame
-                self.move_frame = self.move_frame + 1
-
-                self.moving_animation((self.move_frame // 10) % len(self.move_images))
-                self.moving = False
+                self.moving_animation()
 
         if key_press[pygame.K_d] and self.in_ground:
             self.hold_keys[pygame.K_d][1] += 1
             self.left = False
             self.right = True
             if not self.charging:
-                self.moving = True
                 self.rect.x += self.speed
 
-                # next frame
-                self.move_frame = self.move_frame + 1
-
-                self.moving_animation((self.move_frame // 10) % len(self.move_images))
-                self.moving = False
-
+                self.moving_animation()
 
         print(self.hold_keys) #DEBUG
         for key, hold_key in self.hold_keys.items():
@@ -132,8 +123,13 @@ class MainCharacter(pygame.sprite.Sprite):
 
 
 
-    def moving_animation(self, frame):
-        self.image = pygame.transform.flip(self.move_images[frame], self.left, False)
+    def moving_animation(self):
+        now = pygame.time.get_ticks()
+        if now - self.last_update >= self.frame_rate:
+            self.move_frame += 1
+            frame = self.move_frame % len(self.move_images)
+            self.image = pygame.transform.flip(self.move_images[frame], self.left, False)
+            self.last_update = now
 
 
 
