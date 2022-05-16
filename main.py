@@ -52,6 +52,13 @@ class MainCharacter(pygame.sprite.Sprite):
         self.moving = False
         self.in_ground = True
         self.charging = False
+        
+        #for jumping
+        vel = 5
+        jump = False
+        jumpCount = 0
+        jumpMax = 20
+        space_pressed =0
 
         self.last_update = pygame.time.get_ticks()
         self.frame_rate = setting.frame_rate
@@ -131,7 +138,15 @@ class MainCharacter(pygame.sprite.Sprite):
             self.image = pygame.transform.flip(self.move_images[frame], self.left, False)
             self.last_update = now
 
-
+    #for jumping
+    def jumping(self):
+        if jump:
+            rect.y -= jumpCount
+            jumpCount = jumpMax
+            if jumpCount > -jumpMax:
+                jumpCount -= 1
+            else:
+                jump = False
 
 
 def main():
