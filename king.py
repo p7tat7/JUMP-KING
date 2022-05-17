@@ -2,13 +2,14 @@ import pygame
 import os
 import setting
 import global_var
+import map_setting
 
 class MainCharacter(pygame.sprite.Sprite):
     def __init__(self, x, y, size, jump_h, walk_s):
         pygame.sprite.Sprite.__init__(self)
 
         # index 0 = last frame, index 1 = current frame
-        # The number inside means hold for how many frames
+        # The number inside means holded for how many frames
         self.hold_keys = {
             pygame.K_SPACE: [0, 0],
             pygame.K_a: [0, 0],
@@ -63,6 +64,9 @@ class MainCharacter(pygame.sprite.Sprite):
         self.last_update = pygame.time.get_ticks()
         self.frame_rate = setting.frame_rate
 
+
+
+
     def update(self):
         key_press = pygame.key.get_pressed()
         #print(self.rect.center)
@@ -70,6 +74,10 @@ class MainCharacter(pygame.sprite.Sprite):
         if not self.in_ground:
             # TODO: jumping, find next position
             pass
+
+        # debug
+        if key_press[pygame.K_UP]:
+            self.rect.y -= 5
 
         if not key_press[pygame.K_a] and not key_press[pygame.K_d] and self.in_ground and not self.charging:
             self.image = pygame.transform.flip(self.idle_images[0], self.left, False)
@@ -83,7 +91,11 @@ class MainCharacter(pygame.sprite.Sprite):
             self.hold_keys[pygame.K_a][1] += 1
             self.left = True
             self.right = False
-            collide_wall = global_var.stage_map.get_map_data()[self.rect.center[1] - (setting.character_size[1] // 2) - 1][self.rect.center[0] - (setting.character_size[0] // 2) - 1] != ' '
+
+            # Changed with function <hit_wall>, since it needs to check for all y coordinates of the character
+
+            # collide_wall = global_var.stage_map.get_map_data()[self.rect.center[1] - (setting.character_size[1] // 2) - 1][self.rect.center[0] - (setting.character_size[0] // 2) - 1] != ' '
+            collide_wall = self.hit_wall()
             if not self.charging and not collide_wall:
                 self.rect.x -= self.speed
 
@@ -95,7 +107,11 @@ class MainCharacter(pygame.sprite.Sprite):
             self.hold_keys[pygame.K_d][1] += 1
             self.left = False
             self.right = True
-            collide_wall = global_var.stage_map.get_map_data()[self.rect.center[1] - (setting.character_size[1] // 2) - 1][self.rect.center[0] + (setting.character_size[0] // 2) + 1] != ' '
+
+            # Changed with function <hit_wall>, since it needs to check for all y coordinates of the character
+
+            # collide_wall = global_var.stage_map.get_map_data()[self.rect.center[1] - (setting.character_size[1] // 2) - 1][self.rect.center[0] + (setting.character_size[0] // 2) + 1] != ' '
+            collide_wall = self.hit_wall()
             if not self.charging and not collide_wall:
                 self.rect.x += self.speed
 
@@ -120,7 +136,7 @@ class MainCharacter(pygame.sprite.Sprite):
                         # right jump
                         direction = 1
 
-                    # print("jump (direction: " + str(direction) + ", holding time: " + str(hold_key[0]) + ")")  # DEBUG
+                    print("jump (direction: " + str(direction) + ", holding time: " + str(hold_key[0]) + ")")  # DEBUG
 
                     self.charging = False
 
@@ -132,6 +148,13 @@ class MainCharacter(pygame.sprite.Sprite):
             else:
                 # pressing, update it
                 hold_key[0] = hold_key[1]
+
+        # Change Scene
+        if self.rect.bottom <= 0:
+            self.rect.bottom = setting.screen_size[1]
+            global_var.stage_no += 1
+            global_var.stage_map = map_setting.Map(global_var.stage_no)
+
 
     def moving_animation(self):
         now = pygame.time.get_ticks()
@@ -150,3 +173,17 @@ class MainCharacter(pygame.sprite.Sprite):
                 self.jumpCount -= 1
             else:
                 self.jump = False
+
+    # Check for hitting wall
+    def hit_wall(self):
+        if self.right:
+            y_coor = self.rect.right
+        elif self.left:
+            y_coor = self.rect.left
+
+        for x_coor in range(self.rect.top, self.rect.bottom + 1):
+
+            map_data = global_var.stage_map.get_map_data()
+            if map_data[x_coor][y_coor] == 'X':
+                return True
+        return False

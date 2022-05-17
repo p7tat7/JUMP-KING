@@ -23,8 +23,8 @@ class Map:
                     row_data.append(" ")
             self.map_data.append(row_data)
 
-        #print(self.map_data)
-        self.debugMap()
+        # print(self.map_data)
+        # self.debugMap()
 
     def get_map_data(self):
         return self.map_data
