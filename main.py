@@ -4,6 +4,7 @@ import os
 import setting
 import king
 import map_setting
+import global_var
 
 
 
@@ -12,6 +13,8 @@ def main():
     # Init
     pygame.init()
     clock = pygame.time.Clock()
+
+    pygame.display.set_caption(global_var.GAME_TITLE)
 
     # Create Screen
     game_screen = pygame.display.set_mode(setting.screen_size)
@@ -24,7 +27,7 @@ def main():
     #backdrop = pygame.transform.scale(backdrop, (1200, 1000))
     backdropbox = game_screen.get_rect()
 
-    stage_map = map_setting.Map(1)
+    global_var.stage_map = map_setting.Map(1)
     environment_objects = pygame.sprite.Group()
     player = pygame.sprite.Group()
     environment_objects.add(king_player)

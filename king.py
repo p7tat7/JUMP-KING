@@ -1,6 +1,7 @@
 import pygame
 import os
 import setting
+import global_var
 
 class MainCharacter(pygame.sprite.Sprite):
     def __init__(self, x, y, size, jump_h, walk_s):
@@ -64,6 +65,7 @@ class MainCharacter(pygame.sprite.Sprite):
 
     def update(self):
         key_press = pygame.key.get_pressed()
+        #print(self.rect.center)
 
         if not self.in_ground:
             # TODO: jumping, find next position
@@ -81,19 +83,25 @@ class MainCharacter(pygame.sprite.Sprite):
             self.hold_keys[pygame.K_a][1] += 1
             self.left = True
             self.right = False
-            if not self.charging:
+            collide_wall = global_var.stage_map.get_map_data()[self.rect.center[1] - (setting.character_size[1] // 2) - 1][self.rect.center[0] - (setting.character_size[0] // 2) - 1] != ' '
+            if not self.charging and not collide_wall:
                 self.rect.x -= self.speed
 
                 self.moving_animation()
+            elif not self.charging and collide_wall:
+                self.image = pygame.transform.flip(self.idle_images[0], self.left, False)
 
         if key_press[pygame.K_d] and self.in_ground:
             self.hold_keys[pygame.K_d][1] += 1
             self.left = False
             self.right = True
-            if not self.charging:
+            collide_wall = global_var.stage_map.get_map_data()[self.rect.center[1] - (setting.character_size[1] // 2) - 1][self.rect.center[0] + (setting.character_size[0] // 2) + 1] != ' '
+            if not self.charging and not collide_wall:
                 self.rect.x += self.speed
 
                 self.moving_animation()
+            elif not self.charging and collide_wall:
+                self.image = pygame.transform.flip(self.idle_images[0], self.left, False)
 
         # print(self.hold_keys)  # DEBUG
         for key, hold_key in self.hold_keys.items():
