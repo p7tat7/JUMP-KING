@@ -4,6 +4,47 @@ import setting
 import global_var
 import map_setting
 
+class Parabola():
+    def __init__(self, a, translate_x, current_x, direction, step):
+        self.a = a
+        self.translate_x = translate_x
+        self.current_x = current_x
+        self.direction = direction
+        self.step = step
+
+        if self.direction < 0:
+            self.direction *= -1
+            self.change_direction()
+
+        #print("Parabola():", self.a, self.translate_x, self.current_x, self.direction, self.step)
+
+    def get_direction(self):
+        return self.direction
+
+    # find next position
+    def next(self):
+        # return change of x and y in tuple.
+        x = self.current_x
+        temp = self.direction * self.step if self.direction != 0 else self.step
+        x += temp
+        y = self.get_y(self.current_x) - self.get_y(x)
+        x -= self.current_x
+        self.current_x += self.step
+        if self.direction == 0:
+            temp = 0
+        #print("next():", temp//self.step, y//self.step)
+        return temp//self.step, y//self.step
+
+    def change_direction(self):
+        self.direction *= -1
+        self.step *= -1
+        self.translate_x = self.current_x * -2 - self.translate_x
+
+    def get_y(self, x):
+        return self.a * (x+self.translate_x)**2
+
+
+
 class MainCharacter(pygame.sprite.Sprite):
     def __init__(self, x, y, size, jump_h, walk_s):
         pygame.sprite.Sprite.__init__(self)
@@ -60,6 +101,7 @@ class MainCharacter(pygame.sprite.Sprite):
         self.jumpCount = 0
         self.jumpMax = 20
         self.space_pressed = 0
+        self.parabola = None
 
         self.last_update = pygame.time.get_ticks()
         self.frame_rate = setting.frame_rate
@@ -71,9 +113,42 @@ class MainCharacter(pygame.sprite.Sprite):
         key_press = pygame.key.get_pressed()
         #print(self.rect.center)
 
-        if not self.in_ground:
-            # TODO: jumping, find next position
+        if not self.in_ground and self.parabola != None:
+            # jumping
+
+            self.jumpCount += 1
+
+            # check if hitting ground
+            if self.jumpCount > 1 and self.hit_ground():
+                self.in_ground = self.hit_ground()
+                self.parabola = None
+                self.jumpCount = 0
+                while 1:
+                    self.rect.y -= 1
+                    if not self.hit_ground():
+                        break
+
+            if self.parabola != None:
+                # check if hitting wall
+                if self.hit_wall() and self.parabola.get_direction() != 0:
+                    # change direction
+                    self.parabola.change_direction()
+                    self.right = not self.right
+                    self.left = not self.left
+
+                # find next position
+                x, y = self.parabola.next()
+
+                if y < 0:
+                    self.image = pygame.transform.flip(self.jump_images[1], self.left, False)
+                else:
+                    self.image = pygame.transform.flip(self.jump_images[2], self.left, False)
+                self.rect.x += x
+                self.rect.y += y
+        elif not self.in_ground and self.parabola == None:
+            # TODO: droping without jumping
             pass
+
 
         # debug
         if key_press[pygame.K_UP]:
@@ -139,9 +214,11 @@ class MainCharacter(pygame.sprite.Sprite):
                     print("jump (direction: " + str(direction) + ", holding time: " + str(hold_key[0]) + ")")  # DEBUG
 
                     self.charging = False
+                    self.in_ground = False
 
-                    # TODO
-                    # self.in_ground = False
+                    # TODO: parabola coefficients and starting x position
+                    #       according to the holding time
+                    self.parabola = Parabola(-1, 0, -2, direction, 0.1)
 
                 # didn't press anymore, so reset it
                 self.hold_keys[key] = [0, 0]
@@ -174,16 +251,24 @@ class MainCharacter(pygame.sprite.Sprite):
             else:
                 self.jump = False
 
+    def hit_ground(self):
+        x_coor = self.rect.bottom + 2
+        map_data = global_var.stage_map.get_map_data()
+
+        for y_coor in range(self.rect.left + 2, self.rect.right - 1):
+            if map_data[x_coor][y_coor] == 'X':
+                return True
+        return False
+
     # Check for hitting wall
     def hit_wall(self):
         if self.right:
             y_coor = self.rect.right
         elif self.left:
             y_coor = self.rect.left
+        map_data = global_var.stage_map.get_map_data()
 
         for x_coor in range(self.rect.top, self.rect.bottom + 1):
-
-            map_data = global_var.stage_map.get_map_data()
             if map_data[x_coor][y_coor] == 'X':
                 return True
         return False
