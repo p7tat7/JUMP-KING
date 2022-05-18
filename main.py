@@ -28,6 +28,7 @@ def main():
 
 
     global_var.stage_map = map_setting.Map(global_var.stage_no)
+    king_player.init_location()
     environment_objects = pygame.sprite.Group()
     player = pygame.sprite.Group()
     environment_objects.add(king_player)

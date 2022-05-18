@@ -107,6 +107,11 @@ class MainCharacter(pygame.sprite.Sprite):
         self.frame_rate = setting.frame_rate
 
 
+    def init_location(self):
+        while self.hit_ground():
+            self.rect.y -= 1
+        while not self.hit_ground():
+            self.rect.y += 1
 
 
     def update(self):
@@ -126,6 +131,7 @@ class MainCharacter(pygame.sprite.Sprite):
                 while 1:
                     self.rect.y -= 1
                     if not self.hit_ground():
+                        self.rect.y += 1
                         break
 
             if self.parabola != None:
@@ -145,14 +151,17 @@ class MainCharacter(pygame.sprite.Sprite):
                     self.image = pygame.transform.flip(self.jump_images[2], self.left, False)
                 self.rect.x += x
                 self.rect.y += y
-        elif not self.in_ground and self.parabola == None:
+        elif not self.hit_ground() and self.parabola == None:
             # TODO: droping without jumping
-            pass
-
+            if self.left:
+                self.parabola = Parabola(-1, 0, 0, -1, 0.1)
+            else:
+                self.parabola = Parabola(-1, 0, 0, 1, 0.1)
+            self.in_ground = False
 
         # debug
         if key_press[pygame.K_UP]:
-            self.rect.y -= 5
+            self.rect.y -= 30
 
         if not key_press[pygame.K_a] and not key_press[pygame.K_d] and self.in_ground and not self.charging:
             self.image = pygame.transform.flip(self.idle_images[0], self.left, False)
