@@ -3,9 +3,12 @@ import pygame
 import os
 # pip install Pillow
 from PIL import Image
-import pprint
+
 
 class Map:
+    YELLOW = 255, 255, 0, 255
+    RED = 251, 3, 3, 255
+
     def __init__(self, map_number):
         self.map_display = pygame.image.load(os.path.join(setting.stage_images_path, f'{map_number}.png'))
         self.map_layout = Image.open(os.path.join(setting.stage_images_path, f'{map_number}.png'))
@@ -17,8 +20,10 @@ class Map:
             row_data = []
             for y in range(setting.screen_size[0]):
                 #print(pix_ms[x, y])
-                if (pix_ms[y, x] == (251, 3, 3, 255)):
+                if pix_ms[y, x] == Map.RED:
                     row_data.append("X")
+                elif pix_ms[y, x] == Map.YELLOW:
+                    row_data.append("O")
                 else:
                     row_data.append(" ")
             self.map_data.append(row_data)
