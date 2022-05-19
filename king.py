@@ -284,7 +284,7 @@ class MainCharacter(pygame.sprite.Sprite):
             x_coor = self.rect.left
         map_data = global_var.stage_map.get_map_data()
 
-        for y_coor in range(self.rect.top, self.rect.bottom):
+        for y_coor in range(self.rect.top, self.rect.bottom - 1):
 
             if map_data[y_coor][x_coor] == 'X':
                 return True
