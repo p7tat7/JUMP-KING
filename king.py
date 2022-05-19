@@ -28,7 +28,7 @@ class Parabola():
         temp = self.direction * self.step if self.direction != 0 else self.step
         x += temp
         y = self.get_y(self.current_x) - self.get_y(x)
-        x -= self.current_x
+        # x -= self.current_x
         self.current_x += self.step
         if self.direction == 0:
             temp = 0
