@@ -115,6 +115,7 @@ class MainCharacter(pygame.sprite.Sprite):
 
 
     def update(self):
+
         key_press = pygame.key.get_pressed()
         #print(self.rect.center)
 
@@ -227,7 +228,7 @@ class MainCharacter(pygame.sprite.Sprite):
 
                     # TODO: parabola coefficients and starting x position
                     #       according to the holding time
-                    self.parabola = Parabola(-1, 0, -2, direction, 0.1)
+                    self.parabola = Parabola(-1, 0, -5, direction, 0.1)
 
                 # didn't press anymore, so reset it
                 self.hold_keys[key] = [0, 0]
@@ -240,6 +241,11 @@ class MainCharacter(pygame.sprite.Sprite):
             self.rect.bottom = setting.screen_size[1]
             global_var.stage_no += 1
             global_var.stage_map = map_setting.Map(global_var.stage_no)
+        if self.rect.bottom > setting.screen_size[1]:
+            self.rect.bottom = 1
+            global_var.stage_no -= 1
+            global_var.stage_map = map_setting.Map(global_var.stage_no)
+
 
 
     def moving_animation(self):
@@ -261,23 +267,25 @@ class MainCharacter(pygame.sprite.Sprite):
                 self.jump = False
 
     def hit_ground(self):
-        x_coor = self.rect.bottom + 2
+        y_coor = self.rect.bottom - 1
         map_data = global_var.stage_map.get_map_data()
 
-        for y_coor in range(self.rect.left + 2, self.rect.right - 1):
-            if map_data[x_coor][y_coor] == 'X':
+        for x_coor in range(self.rect.left + 2, self.rect.right - 1):
+
+            if map_data[y_coor][x_coor] == 'X':
                 return True
         return False
 
     # Check for hitting wall
     def hit_wall(self):
         if self.right:
-            y_coor = self.rect.right
+            x_coor = self.rect.right
         elif self.left:
-            y_coor = self.rect.left
+            x_coor = self.rect.left
         map_data = global_var.stage_map.get_map_data()
 
-        for x_coor in range(self.rect.top, self.rect.bottom + 1):
-            if map_data[x_coor][y_coor] == 'X':
+        for y_coor in range(self.rect.top, self.rect.bottom):
+
+            if map_data[y_coor][x_coor] == 'X':
                 return True
         return False

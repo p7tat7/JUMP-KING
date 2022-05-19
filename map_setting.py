@@ -7,7 +7,7 @@ from PIL import Image
 
 class Map:
     YELLOW = 255, 255, 0, 255
-    RED = 251, 3, 3, 255
+    RED = 255, 0, 0, 255
 
     def __init__(self, map_number):
         self.map_display = pygame.image.load(os.path.join(setting.stage_images_path, f'{map_number}.png'))
@@ -16,20 +16,20 @@ class Map:
 
         self.map_data = []
         pix_ms = self.map_sprite.load()
-        for x in range(setting.screen_size[1]):
+        for y in range(setting.screen_size[1]):
             row_data = []
-            for y in range(setting.screen_size[0]):
+            for x in range(setting.screen_size[0]):
                 #print(pix_ms[x, y])
-                if pix_ms[y, x] == Map.RED:
+                if pix_ms[x, y] == Map.RED:
                     row_data.append("X")
-                elif pix_ms[y, x] == Map.YELLOW:
+                elif pix_ms[x, y] == Map.YELLOW:
                     row_data.append("O")
                 else:
                     row_data.append(" ")
             self.map_data.append(row_data)
 
         # print(self.map_data)
-        # self.debugMap()
+        self.debugMap()
 
     def get_map_data(self):
         return self.map_data
