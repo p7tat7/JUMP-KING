@@ -3,45 +3,124 @@ import os
 import setting
 import global_var
 import map_setting
+import math
 
+# y = -1/w (x)^2 + c
+# y = -1/jump_variable (x)^2 + jump_height
 class Parabola():
-    def __init__(self, a, translate_x, current_x, direction, step):
-        self.a = a
-        self.translate_x = translate_x
-        self.current_x = current_x
+    def __init__(self, height, direction, ori_x, ori_y):
+
+        self.jump_height = height
+        # x-intercept
+        x_intercept = self.get_x_intercept()
+        # left: -(0)    right: +(1)
+
+        if direction == -1:
+            self.starting_point = x_intercept[1]
+        elif direction == 1:
+            self.starting_point = x_intercept[0]
+        elif direction == 0:
+            self.starting_point = x_intercept[0]
+        self.current_x = self.starting_point
+        self.ori_x = ori_x
+        self.ori_y = ori_y
+
         self.direction = direction
-        self.step = step
 
-        if self.direction < 0:
-            self.direction *= -1
-            self.change_direction()
-
-        #print("Parabola():", self.a, self.translate_x, self.current_x, self.direction, self.step)
+        print(f' y = -1/{setting.jumping_variable}(x)^2 + {height}')
+        # print("Parabola():", self.a, self.translate_x, self.current_x, self.direction, self.step)
 
     def get_direction(self):
         return self.direction
 
     # find next position
-    def next(self):
-        # return change of x and y in tuple.
-        x = self.current_x
-        temp = self.direction * self.step if self.direction != 0 else self.step
-        x += temp
-        y = self.get_y(self.current_x) - self.get_y(x)
-        # x -= self.current_x
-        self.current_x += self.step
+    def next_position(self):
+        temp_direction = self.direction
         if self.direction == 0:
-            temp = 0
-        #print("next():", temp//self.step, y//self.step)
-        return temp//self.step, y//self.step
+            temp_direction = 1
 
-    def change_direction(self):
-        self.direction *= -1
-        self.step *= -1
-        self.translate_x = self.current_x * -2 - self.translate_x
+        dist = temp_direction * setting.jumping_variable // (setting.maximum_secs_for_jump / 2 * setting.frame_rate)
+        self.current_x += dist
+        add_x = self.current_x - self.starting_point
+        add_y = self.get_current_y()
+        print(f'{self.current_x } {add_y=}')
 
-    def get_y(self, x):
-        return self.a * (x+self.translate_x)**2
+        if self.direction != 0:
+            return (self.ori_x + add_x, self.ori_y - add_y)
+        else:
+            return (self.ori_x, self.ori_y - add_y)
+
+    def change_direction(self, x, y):
+        print("\n\n\n")
+        print('Change direction.')
+        print(f'Before: {self.current_x=} {self.direction=} {self.starting_point=}')
+
+        situation1 = self.direction == 1 and self.current_x < 0
+        situation2 = self.direction == -1 and self.current_x > 0
+
+        if situation1 or situation2:
+            self.direction *= -1
+        else:
+            self.current_x *= -1
+            self.direction *= -1
+
+        self.ori_x = x
+        # self.ori_y = y
+        self.starting_point = self.current_x
+        print(f'After: {self.current_x=} {self.direction=} {self.starting_point=}')
+
+    def get_current_y(self):
+        return -1/setting.jumping_variable * (self.current_x)**2 + self.jump_height
+
+    def get_x_intercept(self):
+        intercept = math.sqrt(self.jump_height * setting.jumping_variable)
+        return (-intercept, intercept)
+
+    def dropping(self):
+        temp_direction = self.direction
+        if self.direction == 0:
+            temp_direction = 1
+
+        return (self.current_x * temp_direction > 0)
+
+# class Parabola():
+#     def __init__(self, a, translate_x, current_x, direction, step):
+#         self.a = a
+#         self.translate_x = translate_x
+#         self.current_x = current_x
+#         self.direction = direction
+#         self.step = step
+#
+#         if self.direction < 0:
+#             self.direction *= -1
+#             self.change_direction()
+#
+#         #print("Parabola():", self.a, self.translate_x, self.current_x, self.direction, self.step)
+#
+#     def get_direction(self):
+#         return self.direction
+#
+#     # find next position
+#     def next(self):
+#         # return change of x and y in tuple.
+#         x = self.current_x
+#         temp = self.direction * self.step if self.direction != 0 else self.step
+#         x += temp
+#         y = self.get_y(self.current_x) - self.get_y(x)
+#         # x -= self.current_x
+#         self.current_x += self.step
+#         if self.direction == 0:
+#             temp = 0
+#         #print("next():", temp//self.step, y//self.step)
+#         return temp//self.step, y//self.step
+#
+#     def change_direction(self):
+#         self.direction *= -1
+#         self.step *= -1
+#         self.translate_x = self.current_x * -2 - self.translate_x
+#
+#     def get_y(self, x):
+#         return self.a * (x+self.translate_x)**2
 
 
 
@@ -87,7 +166,7 @@ class MainCharacter(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.speed = walk_s
-        self.jump = jump_h
+        self.jump_h = jump_h
 
         self.left = False
         self.right = True
@@ -96,15 +175,17 @@ class MainCharacter(pygame.sprite.Sprite):
         self.charging = False
 
         # for jumping
-        vel = 5
-        self.jump = False
+        # vel = 5
+        # self.jump = False
         self.jumpCount = 0
-        self.jumpMax = 20
-        self.space_pressed = 0
+        # self.jumpMax = 20
+        # self.space_pressed = 0
         self.parabola = None
 
         self.last_update = pygame.time.get_ticks()
         self.frame_rate = setting.frame_rate
+
+
 
 
     def init_location(self):
@@ -115,7 +196,7 @@ class MainCharacter(pygame.sprite.Sprite):
 
 
     def update(self):
-
+        print(f'Update {self.rect.x=} {self.rect.y=}')
         key_press = pygame.key.get_pressed()
         #print(self.rect.center)
 
@@ -125,6 +206,7 @@ class MainCharacter(pygame.sprite.Sprite):
             self.jumpCount += 1
 
             # check if hitting ground
+            print(f'{self.rect.right=}')
             if self.jumpCount > 1 and self.hit_ground():
                 self.in_ground = self.hit_ground()
                 self.parabola = None
@@ -135,29 +217,74 @@ class MainCharacter(pygame.sprite.Sprite):
                         self.rect.y += 1
                         break
 
+            # if self.parabola != None:
+            #     # check if hitting wall
+            #     if self.hit_wall() and self.parabola.get_direction() != 0:
+            #         # change direction
+            #         self.parabola.change_direction()
+            #         self.right = not self.right
+            #         self.left = not self.left
+
             if self.parabola != None:
+
+                if self.parabola.dropping():
+                    self.image = pygame.transform.flip(self.jump_images[2], self.left, False)
+                else:
+                    self.image = pygame.transform.flip(self.jump_images[1], self.left, False)
                 # check if hitting wall
-                if self.hit_wall() and self.parabola.get_direction() != 0:
-                    # change direction
-                    self.parabola.change_direction()
-                    self.right = not self.right
-                    self.left = not self.left
+                # if self.hit_wall() and self.parabola.get_direction() != 0:
+                #     # change direction
+                #     self.parabola.change_direction(self.rect.x, self.rect.y)
+                #     self.image = pygame.transform.flip(self.jump_images[3], self.right, False)
+                #     self.right = not self.right
+                #     self.left = not self.left
 
                 # find next position
-                x, y = self.parabola.next()
+                x, y = self.parabola.next_position()
+                print(f'{x=} {y=}')
+                self.rect.x = x
+                self.rect.y = y
+                if self.hit_wall():
+                    if self.right:
+                        temp = -1
+                    elif self.left:
+                        temp = 1
+                    if self.hit_ground():
+                        while 1:
+                            self.rect.y -= 1
+                            if not self.hit_ground():
+                                self.rect.y += 1
+                                break
+                    while 1:
+                        self.rect.x += temp * 1
 
-                if y < 0:
-                    self.image = pygame.transform.flip(self.jump_images[1], self.left, False)
-                else:
-                    self.image = pygame.transform.flip(self.jump_images[2], self.left, False)
-                self.rect.x += x
-                self.rect.y += y
+                        if not self.hit_wall():
+                            self.rect.x += temp * -1
+                            break
+                    # self.rect.x = self.temp_wall_x + (temp * setting.character_size[0]) + temp * 5
+                    print(f'changed: {self.rect.x=} {self.rect.y=}')
+                    if not self.hit_ground():
+                        self.parabola.change_direction(self.rect.x, self.rect.y)
+                        self.image = pygame.transform.flip(self.jump_images[3], self.right, False)
+                        self.right = not self.right
+                        self.left = not self.left
+                print(f'{self.rect.x=} {self.rect.y=}')
+                # if y < 0:
+                #     self.image = pygame.transform.flip(self.jump_images[1], self.left, False)
+                # else:
+                #     self.image = pygame.transform.flip(self.jump_images[2], self.left, False)
+                # self.rect.x += x
+                # self.rect.y += y
+
+
+
+
         elif not self.hit_ground() and self.parabola == None:
             # TODO: droping without jumping
-            if self.left:
-                self.parabola = Parabola(-1, 0, 0, -1, 0.1)
-            else:
-                self.parabola = Parabola(-1, 0, 0, 1, 0.1)
+            # if self.left:
+            #     self.parabola = Parabola(-1, 0, 0, -1, 0.1)
+            # else:
+            #     self.parabola = Parabola(-1, 0, 0, 1, 0.1)
             self.in_ground = False
 
         # debug
@@ -221,14 +348,20 @@ class MainCharacter(pygame.sprite.Sprite):
                         # right jump
                         direction = 1
 
-                    print("jump (direction: " + str(direction) + ", holding time: " + str(hold_key[0]) + ")")  # DEBUG
+
 
                     self.charging = False
                     self.in_ground = False
 
                     # TODO: parabola coefficients and starting x position
                     #       according to the holding time
-                    self.parabola = Parabola(-1, 0, -5, direction, 0.1)
+                    # self.parabola = Parabola(-1, 0, -5, direction, 0.1)
+                    height = hold_key[0] * self.jump_h // setting.frame_rate
+                    if height > self.jump_h:
+                        height = self.jump_h
+                    print("\n\n\n")
+                    print(f"jump ({direction=} {height=})")  # DEBUG
+                    self.parabola = Parabola(height, direction, self.rect.x, self.rect.y)
 
                 # didn't press anymore, so reset it
                 self.hold_keys[key] = [0, 0]
@@ -248,6 +381,7 @@ class MainCharacter(pygame.sprite.Sprite):
 
 
 
+
     def moving_animation(self):
         now = pygame.time.get_ticks()
         if now - self.last_update >= self.frame_rate:
@@ -257,22 +391,23 @@ class MainCharacter(pygame.sprite.Sprite):
             self.last_update = now
 
     # for jumping
-    def jumping(self):
-        if self.jump:
-            self.rect.y -= self.jumpCount
-            self.jumpCount = self.jumpMax
-            if self.jumpCount > -self.jumpMax:
-                self.jumpCount -= 1
-            else:
-                self.jump = False
+    # def jumping(self):
+    #     if self.jump:
+    #         self.rect.y -= self.jumpCount
+    #         self.jumpCount = self.jumpMax
+    #         if self.jumpCount > -self.jumpMax:
+    #             self.jumpCount -= 1
+    #         else:
+    #             self.jump = False
 
     def hit_ground(self):
         y_coor = self.rect.bottom - 1
         map_data = global_var.stage_map.get_map_data()
 
-        for x_coor in range(self.rect.left + 2, self.rect.right - 1):
+        for x_coor in range(self.rect.left + 5, self.rect.right - 5):
 
             if map_data[y_coor][x_coor] == 'X':
+                self.temp_floor_y = y_coor
                 return True
         return False
 
@@ -284,8 +419,9 @@ class MainCharacter(pygame.sprite.Sprite):
             x_coor = self.rect.left
         map_data = global_var.stage_map.get_map_data()
 
-        for y_coor in range(self.rect.top, self.rect.bottom - 1):
+        for y_coor in range(self.rect.top, self.rect.bottom - 5):
 
             if map_data[y_coor][x_coor] == 'X':
+                self.temp_wall_x = x_coor
                 return True
         return False

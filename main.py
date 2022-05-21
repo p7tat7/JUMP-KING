@@ -20,7 +20,7 @@ def main():
     game_screen = pygame.display.set_mode(setting.screen_size)
 
     # Create Character
-    king_player = king.MainCharacter(500, 865, setting.character_size, setting.jumping_height, setting.walking_speed)
+    king_player = king.MainCharacter(500, 865, setting.character_size, setting.maximum_height, setting.walking_speed)
 
     # Create Environment
 
