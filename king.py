@@ -16,12 +16,13 @@ class Parabola():
         # left: -(0)    right: +(1)
 
         if direction == -1:
-            self.starting_point = x_intercept[1]
+            self.starting_point_x = x_intercept[1]
         elif direction == 1:
-            self.starting_point = x_intercept[0]
+            self.starting_point_x = x_intercept[0]
         elif direction == 0:
-            self.starting_point = x_intercept[0]
-        self.current_x = self.starting_point
+            self.starting_point_x = x_intercept[0]
+        self.current_x = self.starting_point_x
+        self.starting_point_y = 0
         self.ori_x = ori_x
         self.ori_y = ori_y
 
@@ -41,8 +42,8 @@ class Parabola():
 
         dist = temp_direction * setting.jumping_variable // (setting.maximum_secs_for_jump / 2 * setting.frame_rate)
         self.current_x += dist
-        add_x = self.current_x - self.starting_point
-        add_y = self.get_current_y()
+        add_x = self.current_x - self.starting_point_x
+        add_y = self.get_current_y() - self.starting_point_y
         print(f'{self.current_x } {add_y=}')
 
         if self.direction != 0:
@@ -53,21 +54,22 @@ class Parabola():
     def change_direction(self, x, y):
         print("\n\n\n")
         print('Change direction.')
-        print(f'Before: {self.current_x=} {self.direction=} {self.starting_point=}')
+        print(f'Before: {self.current_x=} {self.direction=} {self.starting_point_x=}')
 
-        situation1 = self.direction == 1 and self.current_x < 0
-        situation2 = self.direction == -1 and self.current_x > 0
+        # situation1 = self.direction == 1 and self.current_x < 0
+        # situation2 = self.direction == -1 and self.current_x > 0
 
-        if situation1 or situation2:
-            self.direction *= -1
-        else:
-            self.current_x *= -1
-            self.direction *= -1
+        # if situation1 or situation2:
+        #     self.ori_y = y
+        #     self.starting_point_y = y
+
+        self.current_x *= -1
+        self.direction *= -1
 
         self.ori_x = x
         # self.ori_y = y
-        self.starting_point = self.current_x
-        print(f'After: {self.current_x=} {self.direction=} {self.starting_point=}')
+        self.starting_point_x = self.current_x
+        print(f'After: {self.current_x=} {self.direction=} {self.starting_point_x=}')
 
     def get_current_y(self):
         return -1/setting.jumping_variable * (self.current_x)**2 + self.jump_height
@@ -196,7 +198,7 @@ class MainCharacter(pygame.sprite.Sprite):
 
 
     def update(self):
-        print(f'Update {self.rect.x=} {self.rect.y=}')
+        # print(f'Update {self.rect.x=} {self.rect.y=}')
         key_press = pygame.key.get_pressed()
         #print(self.rect.center)
 
@@ -216,6 +218,10 @@ class MainCharacter(pygame.sprite.Sprite):
                     if not self.hit_ground():
                         self.rect.y += 1
                         break
+
+            if self.jumpCount > 1 and self.hit_ceiling():
+                print('\n\n\n\nhit ceiling\n\n\n\n')
+                # self.parabola.current_x *= -1
 
             # if self.parabola != None:
             #     # check if hitting wall
@@ -371,13 +377,21 @@ class MainCharacter(pygame.sprite.Sprite):
 
         # Change Scene
         if self.rect.bottom <= 0:
-            self.rect.bottom = setting.screen_size[1]
+            self.rect.bottom = setting.screen_size[1] - 1
             global_var.stage_no += 1
+            self.parabola.starting_point_y = self.parabola.get_current_y()
+            self.parabola.ori_y = self.rect.y
+            print(f'Changed map: {global_var.stage_no} {self.rect.bottom=}')
             global_var.stage_map = map_setting.Map(global_var.stage_no)
+
         if self.rect.bottom > setting.screen_size[1]:
             self.rect.bottom = 1
             global_var.stage_no -= 1
+            self.parabola.starting_point_y = self.parabola.get_current_y()
+            self.parabola.ori_y = self.rect.y
+            print(f'Changed map: {global_var.stage_no}')
             global_var.stage_map = map_setting.Map(global_var.stage_no)
+
 
 
 
@@ -418,10 +432,21 @@ class MainCharacter(pygame.sprite.Sprite):
         elif self.left:
             x_coor = self.rect.left
         map_data = global_var.stage_map.get_map_data()
-
+        print(f'hit wall {self.rect.x=} {self.rect.y=}')
         for y_coor in range(self.rect.top, self.rect.bottom - 5):
-
+            if y_coor >= setting.screen_size[1] or y_coor < 0:
+                continue
             if map_data[y_coor][x_coor] == 'X':
                 self.temp_wall_x = x_coor
+                return True
+        return False
+
+    def hit_ceiling(self):
+        y_coor = self.rect.top
+        if y_coor < 0 or y_coor > setting.screen_size[1]:
+            return False
+        map_data = global_var.stage_map.get_map_data()
+        for x_coor in range(self.rect.left, self.rect.right):
+            if map_data[y_coor][x_coor] == 'X':
                 return True
         return False

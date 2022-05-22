@@ -29,7 +29,7 @@ class Map:
             self.map_data.append(row_data)
 
         # print(self.map_data)
-        # self.debugMap()
+        self.debugMap()
 
     def get_map_data(self):
         return self.map_data
