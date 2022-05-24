@@ -47,9 +47,15 @@ class Parabola():
         print(f'{self.current_x } {add_y=}')
 
         if self.direction != 0:
-            return (self.ori_x + add_x, self.ori_y - add_y)
+            return (self.ori_x + add_x, self.ori_y - add_y, self.direction)
         else:
-            return (self.ori_x, self.ori_y - add_y)
+            return (self.ori_x, self.ori_y - add_y, self.direction)
+
+    def return_back(self, dist):
+        temp_direction = self.direction
+        if self.direction == 0:
+            temp_direction = 1
+        self.current_x -= dist * temp_direction
 
     def change_direction(self, x, y):
         print("\n\n\n")
@@ -246,10 +252,58 @@ class MainCharacter(pygame.sprite.Sprite):
                 #     self.left = not self.left
 
                 # find next position
-                x, y = self.parabola.next_position()
+                x, y, direction = self.parabola.next_position()
                 print(f'{x=} {y=}')
-                self.rect.x = x
-                self.rect.y = y
+
+                if round(y) > self.rect.y:
+                    add = 1
+                elif round(y) < self.rect.y:
+                    add = -1
+                else:
+                    add = 0
+                while True:
+
+
+                    rangeX = range(self.rect.left + direction, self.rect.right + direction)
+
+                    rangeY = range(self.rect.top + add, self.rect.bottom + add)
+
+                    if self.rect.x == round(x) and self.rect.y == round(y):
+                        break
+
+                    if direction == 1:
+                        right = 1
+                        left = 0
+                    elif direction == -1:
+                        left = 1
+                        right = 0
+
+                    if add == 1:
+                        top = 1
+                        bottom = 0
+                    elif add == -1:
+                        top = 0
+                        bottom = 1
+
+                    hit = self.detect_next(rangeX, rangeY, top, bottom, left, right)
+
+                    # if self.detect_next(rangeX, rangeY):
+                    #     self.parabola.current_x *= -1
+                    # elif self.detect_next(rangeX, rangeY) or self.detect_next(rangeX, rangeY):
+                    #     self.parabola.change_direction(self.rect.x, self.rect.y)
+                    #     self.image = pygame.transform.flip(self.jump_images[3], self.right, False)
+                    #     self.right = not self.right
+                    #     self.left = not self.left
+
+                    # TODO add hit cases
+
+
+                    self.rect.x += direction
+                    self.rect.y += add
+
+
+                # self.rect.x = x
+                # self.rect.y = y
                 if self.hit_wall():
                     if self.right:
                         temp = -1
@@ -433,7 +487,7 @@ class MainCharacter(pygame.sprite.Sprite):
             x_coor = self.rect.left
         map_data = global_var.stage_map.get_map_data()
         print(f'hit wall {self.rect.x=} {self.rect.y=}')
-        for y_coor in range(self.rect.top, self.rect.bottom - 5):
+        for y_coor in range(self.rect.top, self.rect.bottom-1):
             if y_coor >= setting.screen_size[1] or y_coor < 0:
                 continue
             if map_data[y_coor][x_coor] == 'X':
@@ -450,3 +504,56 @@ class MainCharacter(pygame.sprite.Sprite):
             if map_data[y_coor][x_coor] == 'X':
                 return True
         return False
+
+    def detect_next(self, xrange, yrange, xtop, xbottom, yleft, yright):
+        map_data = global_var.stage_map.get_map_data()
+        left_hit = False
+        right_hit = False
+        top_hit = False
+        bottom_hit = False
+        max_x = setting.screen_size[0]
+        min_x = 0
+        max_y = setting.screen_size[1]
+        min_y = 0
+
+        if xtop == 1:
+            y_coor = yrange[0]
+            for x_coor in xrange:
+                if x_coor > max_x or x_coor < min_x:
+                    top_hit = True
+                    break
+                if map_data[y_coor][x_coor] == 'X':
+                    top_hit = True
+                    break
+
+        elif xbottom == 1:
+            y_coor = yrange[len(yrange) - 1]
+            for x_coor in xrange:
+                if x_coor > max_x or x_coor < min_x:
+                    bottom_hit = True
+                    break
+                if map_data[y_coor][x_coor] == 'X':
+                    bottom_hit = True
+                    break
+
+        if yleft == 1:
+            x_coor = xrange[0]
+            for y_coor in yrange:
+                if y_coor > max_y or y_coor < min_y:
+                    left_hit = True
+                    break
+                if map_data[y_coor][x_coor] == 'X':
+                    bottom_hit = True
+                    break
+        elif yright == 1:
+            x_coor = xrange[len(xrange) - 1]
+            for y_coor in yrange:
+                if y_coor > max_y or y_coor < min_y:
+                    right_hit = True
+                    break
+                if map_data[y_coor][x_coor] == 'X':
+                    right_hit = True
+                    break
+
+        result = (top_hit, bottom_hit, left_hit, right_hit)
+        return result
