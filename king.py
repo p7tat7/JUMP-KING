@@ -9,7 +9,7 @@ import math
 # y = -1/jump_variable (x)^2 + jump_height
 class Parabola():
     def __init__(self, height, direction, ori_x, ori_y):
-
+        self.changed_direction = False
         self.jump_height = height
         # x-intercept
         x_intercept = self.get_x_intercept()
@@ -68,6 +68,8 @@ class Parabola():
         # if situation1 or situation2:
         #     self.ori_y = y
         #     self.starting_point_y = y
+
+        self.changed_direction = True
 
         self.current_x *= -1
         self.direction *= -1
@@ -214,16 +216,16 @@ class MainCharacter(pygame.sprite.Sprite):
             self.jumpCount += 1
 
             # check if hitting ground
-            print(f'{self.rect.right=}')
-            if self.jumpCount > 1 and self.hit_ground():
-                self.in_ground = self.hit_ground()
-                self.parabola = None
-                self.jumpCount = 0
-                while 1:
-                    self.rect.y -= 1
-                    if not self.hit_ground():
-                        self.rect.y += 1
-                        break
+            # print(f'{self.rect.right=}')
+            # if self.jumpCount > 1 and self.hit_ground():
+            #     self.in_ground = self.hit_ground()
+            #     self.parabola = None
+            #     self.jumpCount = 0
+            #     while 1:
+            #         self.rect.y -= 1
+            #         if not self.hit_ground():
+            #             self.rect.y += 1
+            #             break
 
             if self.jumpCount > 1 and self.hit_ceiling():
                 print('\n\n\n\nhit ceiling\n\n\n\n')
@@ -239,10 +241,13 @@ class MainCharacter(pygame.sprite.Sprite):
 
             if self.parabola != None:
 
-                if self.parabola.dropping():
-                    self.image = pygame.transform.flip(self.jump_images[2], self.left, False)
+                if self.parabola.changed_direction:
+                    self.image = pygame.transform.flip(self.jump_images[3], self.left, False)
                 else:
-                    self.image = pygame.transform.flip(self.jump_images[1], self.left, False)
+                    if self.parabola.dropping():
+                        self.image = pygame.transform.flip(self.jump_images[2], self.left, False)
+                    else:
+                        self.image = pygame.transform.flip(self.jump_images[1], self.left, False)
                 # check if hitting wall
                 # if self.hit_wall() and self.parabola.get_direction() != 0:
                 #     # change direction
@@ -253,21 +258,25 @@ class MainCharacter(pygame.sprite.Sprite):
 
                 # find next position
                 x, y, direction = self.parabola.next_position()
-                print(f'{x=} {y=}')
+                print(f'{x=} {y=} {direction=}')
+                print(f'{self.rect.x=} {self.rect.y=}')
 
+                print(f'{round(y)=} {self.rect.y=}')
                 if round(y) > self.rect.y:
                     add = 1
                 elif round(y) < self.rect.y:
                     add = -1
                 else:
                     add = 0
+
                 while True:
 
-
-                    rangeX = range(self.rect.left + direction, self.rect.right + direction)
-
-                    rangeY = range(self.rect.top + add, self.rect.bottom + add)
-
+                    rangeX = range(self.rect.left + direction+10, self.rect.right + direction-10)
+                    # print(f'{self.rect.x=} {self.rect.y=} {self.rect.left=} {self.rect.right=} {direction=}')
+                    rangeY = range(self.rect.top + add+1, self.rect.bottom + add-1)
+                    # print(f'{rangeX[0]=} {rangeY[0]=} {rangeX[-1]=} {rangeY[-1]=}')
+                    # print(f'{self.rect.x=} {self.rect.y=} {round(x)=} {round(y)=}')
+                    print(f'{self.rect.bottom=} {rangeY[-1]=}')
                     if self.rect.x == round(x) and self.rect.y == round(y):
                         break
 
@@ -277,15 +286,23 @@ class MainCharacter(pygame.sprite.Sprite):
                     elif direction == -1:
                         left = 1
                         right = 0
+                    else:
+                        left = 0
+                        right = 0
 
                     if add == 1:
-                        top = 1
-                        bottom = 0
-                    elif add == -1:
                         top = 0
                         bottom = 1
+                    elif add == -1:
+                        top = 1
+                        bottom = 0
+                    else:
+                        top = 0
+                        bottom = 0
 
-                    hit = self.detect_next(rangeX, rangeY, top, bottom, left, right)
+                    print(f'{top=} {bottom=} {left=} {right=}')
+                    top_hit, bottom_hit, left_hit, right_hit = self.detect_next(rangeX, rangeY, top, bottom, left, right)
+                    print(f'{top_hit=} {bottom_hit=} {left_hit=} {right_hit=}')
 
                     # if self.detect_next(rangeX, rangeY):
                     #     self.parabola.current_x *= -1
@@ -296,38 +313,68 @@ class MainCharacter(pygame.sprite.Sprite):
                     #     self.left = not self.left
 
                     # TODO add hit cases
-
-
-                    self.rect.x += direction
-                    self.rect.y += add
-
-
-                # self.rect.x = x
-                # self.rect.y = y
-                if self.hit_wall():
-                    if self.right:
-                        temp = -1
-                    elif self.left:
-                        temp = 1
-                    if self.hit_ground():
-                        while 1:
-                            self.rect.y -= 1
-                            if not self.hit_ground():
-                                self.rect.y += 1
-                                break
-                    while 1:
-                        self.rect.x += temp * 1
-
-                        if not self.hit_wall():
-                            self.rect.x += temp * -1
-                            break
-                    # self.rect.x = self.temp_wall_x + (temp * setting.character_size[0]) + temp * 5
-                    print(f'changed: {self.rect.x=} {self.rect.y=}')
-                    if not self.hit_ground():
+                    if left_hit != right_hit:
+                        difference = abs(self.rect.x - round(x))
+                        self.parabola.current_x -= difference * direction
                         self.parabola.change_direction(self.rect.x, self.rect.y)
                         self.image = pygame.transform.flip(self.jump_images[3], self.right, False)
                         self.right = not self.right
                         self.left = not self.left
+                        break
+
+                    if top_hit:
+                        self.parabola.current_x *= -1
+                        break
+
+                    elif bottom_hit:
+                        self.in_ground = bottom_hit
+                        self.parabola = None
+                        self.jumpCount = 0
+                        # while 1:
+                        #     self.rect.y -= 1
+                        #     if not self.hit_ground():
+                        #         self.rect.y += 1
+                        #         break
+                        break
+
+                    
+                    
+                    # print(f'{direction=} {add=}')
+                    # if not top_hit and not bottom_hit and not left_hit and not right_hit:
+                    if self.rect.x != round(x):
+                        self.rect.x += direction
+                    if self.rect.y != round(y) and not bottom_hit:
+                        self.rect.y += add
+
+
+                # self.rect.x = x
+                # self.rect.y = y
+
+                # if self.hit_wall():
+                #     if self.right:
+                #         temp = -1
+                #     elif self.left:
+                #         temp = 1
+                #     if self.hit_ground():
+                #         while 1:
+                #             self.rect.y -= 1
+                #             if not self.hit_ground():
+                #                 self.rect.y += 1
+                #                 break
+                #     while 1:
+                #         self.rect.x += temp * 1
+
+                #         if not self.hit_wall():
+                #             self.rect.x += temp * -1
+                #             break
+                #     # self.rect.x = self.temp_wall_x + (temp * setting.character_size[0]) + temp * 5
+                #     print(f'changed: {self.rect.x=} {self.rect.y=}')
+                #     if not self.hit_ground():
+                #         self.parabola.change_direction(self.rect.x, self.rect.y)
+                #         self.image = pygame.transform.flip(self.jump_images[3], self.right, False)
+                #         self.right = not self.right
+                #         self.left = not self.left
+
                 print(f'{self.rect.x=} {self.rect.y=}')
                 # if y < 0:
                 #     self.image = pygame.transform.flip(self.jump_images[1], self.left, False)
@@ -345,7 +392,8 @@ class MainCharacter(pygame.sprite.Sprite):
             #     self.parabola = Parabola(-1, 0, 0, -1, 0.1)
             # else:
             #     self.parabola = Parabola(-1, 0, 0, 1, 0.1)
-            self.in_ground = False
+            # self.in_ground = False
+            pass
 
         # debug
         if key_press[pygame.K_UP]:
@@ -505,7 +553,7 @@ class MainCharacter(pygame.sprite.Sprite):
                 return True
         return False
 
-    def detect_next(self, xrange, yrange, xtop, xbottom, yleft, yright):
+    def detect_next(self, x_range, y_range, xtop, xbottom, yleft, yright):
         map_data = global_var.stage_map.get_map_data()
         left_hit = False
         right_hit = False
@@ -517,8 +565,8 @@ class MainCharacter(pygame.sprite.Sprite):
         min_y = 0
 
         if xtop == 1:
-            y_coor = yrange[0]
-            for x_coor in xrange:
+            y_coor = y_range[0]
+            for x_coor in x_range:
                 if x_coor > max_x or x_coor < min_x:
                     top_hit = True
                     break
@@ -527,8 +575,8 @@ class MainCharacter(pygame.sprite.Sprite):
                     break
 
         elif xbottom == 1:
-            y_coor = yrange[len(yrange) - 1]
-            for x_coor in xrange:
+            y_coor = y_range[-1]
+            for x_coor in x_range:
                 if x_coor > max_x or x_coor < min_x:
                     bottom_hit = True
                     break
@@ -536,24 +584,24 @@ class MainCharacter(pygame.sprite.Sprite):
                     bottom_hit = True
                     break
 
-        if yleft == 1:
-            x_coor = xrange[0]
-            for y_coor in yrange:
-                if y_coor > max_y or y_coor < min_y:
-                    left_hit = True
-                    break
-                if map_data[y_coor][x_coor] == 'X':
-                    bottom_hit = True
-                    break
-        elif yright == 1:
-            x_coor = xrange[len(xrange) - 1]
-            for y_coor in yrange:
-                if y_coor > max_y or y_coor < min_y:
-                    right_hit = True
-                    break
-                if map_data[y_coor][x_coor] == 'X':
-                    right_hit = True
-                    break
+        # if yleft == 1:
+        x_coor = x_range[0]
+        for y_coor in y_range:
+            if y_coor > max_y or y_coor < min_y:
+                left_hit = True
+                break
+            if map_data[y_coor][x_coor] == 'X':
+                left_hit = True
+                break
+        # elif yright == 1:
+        x_coor = x_range[-1]
+        for y_coor in y_range:
+            if y_coor > max_y or y_coor < min_y:
+                right_hit = True
+                break
+            if map_data[y_coor][x_coor] == 'X':
+                right_hit = True
+                break
 
         result = (top_hit, bottom_hit, left_hit, right_hit)
         return result
