@@ -48,7 +48,6 @@ class Parabola():
         self.jump_height = height
         # x-intercept
         x_intercept = self.get_x_intercept()
-        # left: -(0)    right: +(1)
 
         if direction == -1:
             self.starting_point_x = x_intercept[1]
@@ -64,7 +63,6 @@ class Parabola():
         self.direction = direction
 
         print(f' y = -1/{setting.jumping_variable}(x)^2 + {height}')
-        # print("Parabola():", self.a, self.translate_x, self.current_x, self.direction, self.step)
 
     def get_direction(self):
         return self.direction
@@ -75,12 +73,10 @@ class Parabola():
         if self.direction == 0:
             temp_direction = 1
 
-        # dist = temp_direction * setting.jumping_variable // (setting.maximum_secs_for_jump / 2 * setting.frame_rate)
         dist = temp_direction * setting.jumping_px_per_frame
         self.current_x += dist
         add_x = self.current_x - self.starting_point_x
         add_y = self.get_current_y() - self.starting_point_y
-        # print(f'{self.current_x } {add_y=}')
 
         if self.direction != 0:
             return (self.ori_x + add_x, self.ori_y - add_y, self.direction)
@@ -94,26 +90,12 @@ class Parabola():
         self.current_x -= dist * temp_direction
 
     def change_direction(self, x, y):
-        # print("\n\n\n")
-        # print('Change direction.')
-        # print(f'Before: {self.current_x=} {self.direction=} {self.starting_point_x=}')
-
-        # situation1 = self.direction == 1 and self.current_x < 0
-        # situation2 = self.direction == -1 and self.current_x > 0
-
-        # if situation1 or situation2:
-        #     self.ori_y = y
-        #     self.starting_point_y = y
-
         self.changed_direction = True
-
         self.current_x *= -1
         self.direction *= -1
-
         self.ori_x = x
-        # self.ori_y = y
         self.starting_point_x = self.current_x
-        # print(f'After: {self.current_x=} {self.direction=} {self.starting_point_x=}')
+
 
     def get_current_y(self):
         return -1/setting.jumping_variable * (self.current_x)**2 + self.jump_height
@@ -128,47 +110,6 @@ class Parabola():
             temp_direction = 1
 
         return (self.current_x * temp_direction > 0)
-
-# class Parabola():
-#     def __init__(self, a, translate_x, current_x, direction, step):
-#         self.a = a
-#         self.translate_x = translate_x
-#         self.current_x = current_x
-#         self.direction = direction
-#         self.step = step
-#
-#         if self.direction < 0:
-#             self.direction *= -1
-#             self.change_direction()
-#
-#         #print("Parabola():", self.a, self.translate_x, self.current_x, self.direction, self.step)
-#
-#     def get_direction(self):
-#         return self.direction
-#
-#     # find next position
-#     def next(self):
-#         # return change of x and y in tuple.
-#         x = self.current_x
-#         temp = self.direction * self.step if self.direction != 0 else self.step
-#         x += temp
-#         y = self.get_y(self.current_x) - self.get_y(x)
-#         # x -= self.current_x
-#         self.current_x += self.step
-#         if self.direction == 0:
-#             temp = 0
-#         #print("next():", temp//self.step, y//self.step)
-#         return temp//self.step, y//self.step
-#
-#     def change_direction(self):
-#         self.direction *= -1
-#         self.step *= -1
-#         self.translate_x = self.current_x * -2 - self.translate_x
-#
-#     def get_y(self, x):
-#         return self.a * (x+self.translate_x)**2
-
-
 
 class MainCharacter(pygame.sprite.Sprite):
     def __init__(self, x, y, size, jump_h, walk_s):
@@ -221,12 +162,10 @@ class MainCharacter(pygame.sprite.Sprite):
         self.charging = False
 
         # for jumping
-        # vel = 5
         self.jumped = False
         self.jumpCount = 0
-        # self.jumpMax = 20
-        # self.space_pressed = 0
         self.parabola = None
+
         self.exponential = None
         self.drop_height = 0
         self.drop_freeze = False
@@ -256,7 +195,6 @@ class MainCharacter(pygame.sprite.Sprite):
 
         if self.drop_freeze:
             self.image = pygame.transform.flip(self.drop_images[0], self.right, False)
-            # self.image = self.drop_images[0]
             self.drop_freeze_frame += 1
             print(f'{self.drop_freeze_frame}')
             if self.drop_freeze_frame >= setting.drop_png_frame:
