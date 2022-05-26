@@ -17,6 +17,7 @@ maximum_secs_for_jump = 0.5
 jumping_px_per_frame = 10
 maximum_height = 500
 character_images_path = "character_png"
+character_sound_path = "character_sound"
 character_move_ani = os.path.join(character_images_path, 'movement')
 character_jump_ani = os.path.join(character_images_path, 'jump')
 character_drop_ani = os.path.join(character_images_path, 'drop')
@@ -26,3 +27,8 @@ dropping_px_per_frame = 2
 drop_png_height = 900
 drop_png_frame = 60
 
+# Character sound files name
+jump_sound = "jump.mp3"
+land_sound = "land.mp3"
+hit_wall_sound = "hit_wall.mp3"
+drop_sound = "drop.mp3"
