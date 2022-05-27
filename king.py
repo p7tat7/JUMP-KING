@@ -506,7 +506,7 @@ class MainCharacter(pygame.sprite.Sprite):
                 if x_coor >= max_x or x_coor < min_x:
                     # top_hit = True
                     # break
-                    pass
+                    continue
                 if map_data[y_coor][x_coor] == 'X':
 
                     top_hit = True
@@ -519,34 +519,41 @@ class MainCharacter(pygame.sprite.Sprite):
                     bottom_hit = False
                     break
                 if x_coor >= max_x or x_coor < min_x:
-                    bottom_hit = True
-                    break
-                # print(f'{y_coor=} {x_coor=} {map_data[y_coor][x_coor]=}')
+                    #bottom_hit = True
+                    #break
+                    continue
                 if map_data[y_coor][x_coor] == 'X':
                     bottom_hit = True
                     break
 
         # if yleft == 1:
         x_coor = x_range[0]
-        for y_coor in y_range:
-            if y_coor >= max_y or y_coor < min_y:
-                left_hit = True
-                break
-            if map_data[y_coor][x_coor] == 'X':
-                left_hit = True
-                break
+        if x_coor <= min_x:
+            left_hit = True
+        else:
+            for y_coor in y_range:
+                if y_coor >= max_y or y_coor < min_y:
+                    #left_hit = True
+                    #break
+                    continue
+                if map_data[y_coor][x_coor] == 'X':
+                    left_hit = True
+                    break
         # elif yright == 1:
         x_coor = x_range[-1]
-        for y_coor in y_range:
-            if y_coor >= max_y or y_coor < min_y:
-                right_hit = True
-                break
-            if map_data[y_coor][x_coor] == 'X':
-                right_hit = True
-                break
+        if x_coor >= max_x-1:
+            right_hit = True
+        else:
+            for y_coor in y_range:
+                if y_coor >= max_y or y_coor < min_y:
+                    #right_hit = True
+                    #break
+                    continue
+                if map_data[y_coor][x_coor] == 'X':
+                    right_hit = True
+                    break
 
-        result = (top_hit, bottom_hit, left_hit, right_hit)
-        return result
+        return top_hit, bottom_hit, left_hit, right_hit
 
     def on_ground(self):
         max_y = setting.screen_size[1]
