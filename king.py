@@ -5,29 +5,24 @@ import global_var
 import map_setting
 import math
 
+import main
+
 # y = -(direction * x)^dropping_variable
 class Exponential():
     def __init__(self, direction, ori_x, ori_y):
         self.direction = direction
-        print(f'{ori_x=} {ori_y=}')
         self.ori_x = ori_x
         self.ori_y = ori_y
         self.current_x = 0
         self.starting_point_x = 0
         self.starting_point_y = 0
 
-        print("\n\n\n")
-        print(f' y = -({self.direction} * x)^2')
-
     def next_position(self):
-
         dist = self.direction * setting.dropping_px_per_frame
         self.current_x += dist
 
         add_x = self.current_x - self.starting_point_x
         add_y = self.get_current_y() - self.starting_point_y
-        print(f'{add_x=} {add_y=}')
-        print(f'{self.ori_x=} {self.ori_y=}')
         return self.ori_x + add_x, self.ori_y - add_y, self.direction
 
     def change_direction(self, x):
@@ -62,8 +57,6 @@ class Parabola():
 
         self.direction = direction
 
-        print(f' y = -1/{setting.jumping_variable}(x)^2 + {height}')
-
     def get_direction(self):
         return self.direction
 
@@ -79,9 +72,9 @@ class Parabola():
         add_y = self.get_current_y() - self.starting_point_y
 
         if self.direction != 0:
-            return (self.ori_x + add_x, self.ori_y - add_y, self.direction)
+            return self.ori_x + add_x, self.ori_y - add_y, self.direction
         else:
-            return (self.ori_x, self.ori_y - add_y, self.direction)
+            return self.ori_x, self.ori_y - add_y, self.direction
 
     def return_back(self, dist):
         temp_direction = self.direction
@@ -98,11 +91,11 @@ class Parabola():
 
 
     def get_current_y(self):
-        return -1/setting.jumping_variable * (self.current_x)**2 + self.jump_height
+        return -1/setting.jumping_variable * self.current_x ** 2 + self.jump_height
 
     def get_x_intercept(self):
         intercept = math.sqrt(self.jump_height * setting.jumping_variable)
-        return (-intercept, intercept)
+        return -intercept, intercept
 
     def dropping(self):
         temp_direction = self.direction
@@ -179,8 +172,6 @@ class MainCharacter(pygame.sprite.Sprite):
         self.land_sound = pygame.mixer.Sound(os.path.join(setting.character_sound_path, setting.land_sound))
         self.hit_wall_sound = pygame.mixer.Sound(os.path.join(setting.character_sound_path, setting.hit_wall_sound))
         self.drop_sound = pygame.mixer.Sound(os.path.join(setting.character_sound_path, setting.drop_sound))
-
-
 
     def init_location(self):
         while self.hit_ground():
@@ -329,6 +320,7 @@ class MainCharacter(pygame.sprite.Sprite):
             self.parabola.ori_y = self.rect.y
             print(f'Changed map: {global_var.stage_no} {self.rect.bottom=}')
             global_var.stage_map = map_setting.Map(global_var.stage_no)
+            main.update_map()
 
         if self.rect.bottom > setting.screen_size[1]:
             self.rect.bottom = 1
@@ -341,6 +333,7 @@ class MainCharacter(pygame.sprite.Sprite):
                 self.exponential.ori_y = self.rect.y
             print(f'Changed map: {global_var.stage_no}')
             global_var.stage_map = map_setting.Map(global_var.stage_no)
+            main.update_map()
 
 
     def move_position(self, x, y, direction):
@@ -351,7 +344,7 @@ class MainCharacter(pygame.sprite.Sprite):
         else:
             add = 0
 
-        while True:
+        while 1:
 
             rangeX = range(self.rect.left + direction + 1, self.rect.right + direction - 1)
             # print(f'{self.rect.x=} {self.rect.y=} {self.rect.left=} {self.rect.right=} {direction=}')

@@ -1,20 +1,23 @@
 import os
 
 # Game Setting
-FPS = 60
+FPS = 30
 
 # Screen Settings
 screen_size = [1200, 1000]
-stage_images_path = "stage_png"
-
+all_stage_path = "stage_png"
+stage_images_path = os.path.join(all_stage_path, "stage")
+level_collision_path = os.path.join(all_stage_path, "level")
+background_path = os.path.join(all_stage_path, "background")
+foreground_path = os.path.join(all_stage_path, "foreground")
 
 # Character Settings
 frame_rate = 100
 character_size = [70, 80]
 walking_speed = 3
 jumping_variable = 300
-maximum_secs_for_jump = 0.5
-jumping_px_per_frame = 10
+maximum_secs_for_jump = 0.25
+jumping_px_per_frame = 15
 maximum_height = 500
 character_images_path = "character_png"
 character_sound_path = "character_sound"

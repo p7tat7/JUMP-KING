@@ -4,6 +4,7 @@ import os
 # pip install Pillow
 from PIL import Image
 
+import global_var
 
 class Map:
     YELLOW = 255, 255, 0, 255
@@ -12,7 +13,7 @@ class Map:
     def __init__(self, map_number):
         self.map_display = pygame.image.load(os.path.join(setting.stage_images_path, f'{map_number}.png'))
         self.map_layout = Image.open(os.path.join(setting.stage_images_path, f'{map_number}.png'))
-        self.map_sprite = Image.open(os.path.join(setting.stage_images_path, f'{map_number}s.png'))
+        self.map_sprite = Image.open(os.path.join(setting.level_collision_path, f'{map_number}s.png'))
 
         self.map_data = []
         pix_ms = self.map_sprite.load()
@@ -29,7 +30,7 @@ class Map:
             self.map_data.append(row_data)
 
         # print(self.map_data)
-        self.debugMap()
+        # self.debugMap()
 
     def get_map_data(self):
         return self.map_data
@@ -43,3 +44,4 @@ class Map:
                     continue
                 print(self.map_data[i][j], end='')
             print()
+
