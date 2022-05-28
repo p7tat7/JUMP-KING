@@ -83,6 +83,7 @@ class Parabola():
         self.current_x -= dist * temp_direction
 
     def change_direction(self, x, y):
+
         self.changed_direction = True
         self.current_x *= -1
         self.direction *= -1
@@ -91,7 +92,7 @@ class Parabola():
 
 
     def get_current_y(self):
-        return -1/setting.jumping_variable * self.current_x ** 2 + self.jump_height
+        return -1/(setting.jumping_variable) * self.current_x ** 2 + self.jump_height
 
     def get_x_intercept(self):
         intercept = math.sqrt(self.jump_height * setting.jumping_variable)
@@ -153,6 +154,7 @@ class MainCharacter(pygame.sprite.Sprite):
         self.moving = False
         self.in_ground = True
         self.charging = False
+        # self.dropping = False
 
         # for jumping
         self.jumped = False
@@ -169,16 +171,22 @@ class MainCharacter(pygame.sprite.Sprite):
 
         # Sound effect
         self.jump_sound = pygame.mixer.Sound(os.path.join(setting.character_sound_path, setting.jump_sound))
+        self.jump_sound.set_volume(1)
         self.land_sound = pygame.mixer.Sound(os.path.join(setting.character_sound_path, setting.land_sound))
+        self.land_sound.set_volume(1)
         self.hit_wall_sound = pygame.mixer.Sound(os.path.join(setting.character_sound_path, setting.hit_wall_sound))
+        self.hit_wall_sound.set_volume(1)
         self.drop_sound = pygame.mixer.Sound(os.path.join(setting.character_sound_path, setting.drop_sound))
+        self.drop_sound.set_volume(1)
+
+
+
 
     def init_location(self):
         while self.hit_ground():
             self.rect.y -= 1
         while not self.hit_ground():
             self.rect.y += 1
-
 
     def update(self):
 
@@ -187,7 +195,6 @@ class MainCharacter(pygame.sprite.Sprite):
         if self.drop_freeze:
             self.image = pygame.transform.flip(self.drop_images[0], self.right, False)
             self.drop_freeze_frame += 1
-            print(f'{self.drop_freeze_frame}')
             if self.drop_freeze_frame >= setting.drop_png_frame:
                 self.drop_freeze = False
                 self.drop_freeze_frame = 0
@@ -224,6 +231,7 @@ class MainCharacter(pygame.sprite.Sprite):
             self.exponential = Exponential(current_direction, self.rect.x, self.rect.y)
             self.dropping = True
 
+
         if self.exponential != None and self.dropping:
             self.image = pygame.transform.flip(self.jump_images[2], self.left, False)
             x, y, direction = self.exponential.next_position()
@@ -241,8 +249,8 @@ class MainCharacter(pygame.sprite.Sprite):
         if not key_press[pygame.K_a] and not key_press[pygame.K_d] and self.in_ground and not self.charging and self.on_ground():
             self.image = pygame.transform.flip(self.idle_images[0], self.left, False)
 
-        if key_press[pygame.K_SPACE] and self.in_ground:
-            if self.hold_keys[pygame.K_SPACE][1] < setting.maximum_secs_for_jump * setting.frame_rate:
+        if key_press[pygame.K_SPACE] and self.in_ground and self.exponential == None:
+            if self.hold_keys[pygame.K_SPACE][1] < setting.maximum_secs_for_jump * setting.FPS:
                 self.hold_keys[pygame.K_SPACE][1] += 1
 
             self.charging = True
@@ -277,7 +285,7 @@ class MainCharacter(pygame.sprite.Sprite):
         for key, hold_key in self.hold_keys.items():
             if hold_key[0] == hold_key[1] and hold_key[0] != 0:
                 # just release the key
-                if key == pygame.K_SPACE:
+                if key == pygame.K_SPACE and self.exponential == None:
                     # start jumping
                     direction = 0
                     if self.hold_keys[pygame.K_a][1] > 0 and self.hold_keys[pygame.K_d][1] > 0:
@@ -296,14 +304,15 @@ class MainCharacter(pygame.sprite.Sprite):
                     # TODO: parabola coefficients and starting x position
                     #       according to the holding time
                     # self.parabola = Parabola(-1, 0, -5, direction, 0.1)
-                    height = (hold_key[0] / setting.frame_rate) / setting.maximum_secs_for_jump * self.jump_h
+                    height = (hold_key[0] / setting.FPS) / setting.maximum_secs_for_jump * self.jump_h
                     # print(f'{height=}')
                     if height > self.jump_h:
                         height = self.jump_h
                     # print("\n\n\n")
                     # print(f"jump ({direction=} {height=})")  # DEBUG
                     pygame.mixer.Sound.play(self.jump_sound)
-                    pygame.mixer.music.stop()
+
+                    # pygame.mixer.music.stop()
                     self.parabola = Parabola(height, direction, self.rect.x, self.rect.y)
 
                 # didn't press anymore, so reset it

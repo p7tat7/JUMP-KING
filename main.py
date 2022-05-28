@@ -6,14 +6,19 @@ import setting
 import king
 import map_setting
 import global_var
+import start_menu
 
 
 
 def main():
 
     # Init
-
     pygame.init()
+
+    # font
+    font1 = pygame.font.Font(setting.SourceHanSansCN, 32)
+    font2 = pygame.font.Font(setting.SourceHanSansCN_normal, 32)
+
     clock = pygame.time.Clock()
     pygame.event.set_allowed([pygame.K_a, pygame.K_d, pygame.K_SPACE, pygame.QUIT])
     pygame.display.set_caption(global_var.GAME_TITLE)
@@ -23,19 +28,46 @@ def main():
     game_screen = pygame.display.set_mode(setting.screen_size)
     game_screen.set_alpha(None)
 
+    # Start Menu
+    press_start = start_menu.PressStart()
+    logo = start_menu.Logo()
+    start_menu_start = True
+    pygame.mixer.init()
+    pygame.mixer.music.set_volume(setting.default_volume)
+    pygame.mixer.music.load(setting.background_music1_path)
+    pygame.mixer.music.play()
+    while start_menu_start:
+        clock.tick(setting.FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            elif event.type == pygame.KEYDOWN and logo.completed:
+                if event.key == pygame.K_SPACE:
+                    pygame.mixer.Sound.play(press_start.click_sound)
+                    press_start.clicked = True
+        game_screen.fill((0, 0, 0))
+        logo.update()
+        game_screen.blit(logo.image, logo.rect)
+        if logo.completed:
+            press_start.update()
+            if press_start.show:
+                game_screen.blit(press_start.image, press_start.rect)
+        if press_start.complete:
+            start_menu_start = False
+
+        pygame.display.flip()
+
+    pygame.mixer.music.stop()
+
     # Create Character
     king_player = king.MainCharacter(500, 865, setting.character_size, setting.maximum_height, setting.walking_speed)
 
     # Create Environment
-
-    #backdrop = pygame.transform.scale(backdrop, (1200, 1000))
-
-
     global_var.stage_map = map_setting.Map(global_var.stage_no)
     king_player.init_location()
-    environment_objects = pygame.sprite.Group()
+    # environment_objects = pygame.sprite.Group()
     player = pygame.sprite.Group()
-    environment_objects.add(king_player)
+    # environment_objects.add(king_player)
     player.add(king_player)
 
     game_started = True
