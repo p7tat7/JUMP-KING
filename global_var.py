@@ -12,3 +12,8 @@ background = pygame.transform.scale(background, setting.screen_size)
 backdrop = pygame.image.load(os.path.join(setting.stage_images_path, f"{stage_no}.png"))
 foreground = pygame.image.load(os.path.join(setting.foreground_path, f"fg{stage_no}.png"))
 foreground = pygame.transform.scale(foreground, setting.screen_size)
+
+# font
+pygame.init()
+font1 = pygame.font.Font(setting.SourceHanSansCN, 32)
+font2 = pygame.font.Font(setting.SourceHanSansCN_normal, 32)

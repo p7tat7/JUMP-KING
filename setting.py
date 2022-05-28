@@ -16,7 +16,6 @@ level_collision_path = os.path.join(all_stage_path, "level")
 background_path = os.path.join(all_stage_path, "background")
 foreground_path = os.path.join(all_stage_path, "foreground")
 
-
 # Menu Audio
 default_volume = 0.7
 audio_path = "audio"
@@ -27,6 +26,8 @@ sfx_path = os.path.join(audio_path, "sfx")
 menu_pic_path = "menu_pic"
 logo_path = os.path.join(menu_pic_path, "title_logo.png")
 press_space_path = os.path.join(menu_pic_path, "press_space.png")
+box_path = os.path.join(menu_pic_path, "box.png")
+arrow_path = os.path.join(menu_pic_path, "arrow.png")
 
 # Music
 background_music1_path = os.path.join(music_path, "menu_intro.wav")
@@ -60,3 +61,7 @@ jump_sound = "jump.mp3"
 land_sound = "land.mp3"
 hit_wall_sound = "hit_wall.mp3"
 drop_sound = "drop.mp3"
+
+# Start Menu
+options = ['繼續', '新遊戲', '選項', '退出']
+
