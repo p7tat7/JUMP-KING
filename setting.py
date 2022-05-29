@@ -36,8 +36,11 @@ opening_music_path = os.path.join(music_path, "opening theme.wav")
 # SFX
 title_hit_path = os.path.join(sfx_path, "title_hit.wav")
 press_start_path = os.path.join(sfx_path, "press_start.wav")
+menu_open_path = os.path.join(sfx_path, "menu_open.wav")
+select_path = os.path.join(sfx_path, "selectA.wav")
 
 # Character Settings
+default_xy = (500, 865)
 frame_rate = 100
 character_size = [70, 80]
 walking_speed = 5
@@ -64,4 +67,10 @@ drop_sound = "drop.mp3"
 
 # Start Menu
 options = ['繼續', '新遊戲', '選項', '退出']
-
+option1 = '繼續'
+option2 = '新遊戲'
+option3 = '選項'
+option4 = '退出'
+main_menu_box_xy = (300, 500)
+main_menu_box_size = (200, 300)
+welcome_message = '傳說頂層有個辣妹 佢叫mingming....'

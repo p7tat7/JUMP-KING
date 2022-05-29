@@ -15,5 +15,5 @@ foreground = pygame.transform.scale(foreground, setting.screen_size)
 
 # font
 pygame.init()
-font1 = pygame.font.Font(setting.SourceHanSansCN, 32)
-font2 = pygame.font.Font(setting.SourceHanSansCN_normal, 32)
+font1 = pygame.font.Font(setting.SourceHanSansCN, 25)
+font2 = pygame.font.Font(setting.SourceHanSansCN_normal, 2)

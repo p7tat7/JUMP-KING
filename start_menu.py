@@ -26,6 +26,9 @@ class Logo(pygame.sprite.Sprite):
         self.shake_time = 3
         self.shaked = 0
 
+        self.fade_in = True
+        self.fade_out = False
+
         # Speed
         self.shake_speed = 10
         self.move_speed = 5
@@ -37,9 +40,13 @@ class Logo(pygame.sprite.Sprite):
         self.title_hit_sound = mixer.Sound(setting.title_hit_path)
 
     def update(self):
-        if self.alpha <= 255:
+        # print(f'{self.fade_out=} {self.alpha=}')
+        if self.fade_in and self.alpha <= 255:
             self.image.set_alpha(self.alpha)
             self.alpha += 5
+        elif self.fade_out and self.alpha >= 0:
+            self.image.set_alpha(self.alpha)
+            self.alpha -= 10
         if not self.meet_goal_y:
             self.logo_animation()
         elif not self.completed:
