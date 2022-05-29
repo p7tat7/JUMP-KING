@@ -158,13 +158,14 @@ class MainCharacter(pygame.sprite.Sprite):
 
         # for jumping
         self.jumped = False
-        self.jumpCount = 0
+        # self.jumpCount = 0
         self.parabola = None
 
         self.exponential = None
         self.drop_height = 0
         self.drop_freeze = False
         self.drop_freeze_frame = 0
+        self.dropping = False
 
         self.last_update = pygame.time.get_ticks()
         self.frame_rate = setting.frame_rate
@@ -203,7 +204,7 @@ class MainCharacter(pygame.sprite.Sprite):
         if not self.in_ground and self.parabola != None:
             # jumping
 
-            self.jumpCount += 1
+            # self.jumpCount += 1
 
             if self.parabola != None:
 
@@ -428,7 +429,7 @@ class MainCharacter(pygame.sprite.Sprite):
                     pygame.mixer.music.stop()
 
                 self.drop_height = 0
-                self.jumpCount = 0
+                # self.jumpCount = 0
                 self.jumped = True
                 self.dropping = False
                 break
