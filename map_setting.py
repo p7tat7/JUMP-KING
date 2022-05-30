@@ -7,8 +7,10 @@ from PIL import Image
 import global_var
 
 class Map:
-    YELLOW = 255, 255, 0, 255
-    RED = 255, 0, 0, 255
+    YELLOW = (255, 255, 0, 255)
+    YELLOW_T = (255, 255, 0)
+    RED = (255, 0, 0, 255)
+    RED_T = (255, 0, 0)
 
     def __init__(self, map_number):
         self.map_display = pygame.image.load(os.path.join(setting.stage_images_path, f'{map_number}.png'))
@@ -20,19 +22,20 @@ class Map:
         for y in range(setting.screen_size[1]):
             row_data = []
             for x in range(setting.screen_size[0]):
-                #print(pix_ms[x, y])
-                if pix_ms[x, y] == Map.RED:
+
+                if pix_ms[x, y] == Map.RED or pix_ms[x, y] == Map.RED_T:
                     row_data.append("X")
-                elif pix_ms[x, y] == Map.YELLOW:
+                elif pix_ms[x, y] == Map.YELLOW or pix_ms[x, y] == Map.YELLOW_T:
                     row_data.append("O")
                 else:
                     row_data.append(" ")
             self.map_data.append(row_data)
 
         # print(self.map_data)
-        # self.debugMap()
+        self.debugMap()
 
     def get_map_data(self):
+
         return self.map_data
 
     def debugMap(self):
