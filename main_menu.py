@@ -16,13 +16,14 @@ class Box(pygame.sprite.Sprite):
 
 
 class Arrow(pygame.sprite.Sprite):
-    def __init__(self, x, y, positions):
+    def __init__(self, x, y, size, positions, no_of_options):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(setting.arrow_path)
-        self.image = pygame.transform.scale(self.image, (30, 30))
+        self.image = pygame.transform.scale(self.image, size)
         self.rect = self.image.get_rect(center=(x, y))
         self.index = 1
         self.positions = positions
+        self.options = no_of_options
 
     # def update(self):
     #     # for event in pygame.event.get():
@@ -44,7 +45,7 @@ class Arrow(pygame.sprite.Sprite):
         return self.index == 1
 
     def max(self):
-        return self.index == len(setting.options)
+        return self.index == self.options
 
     def move(self, direction):
         if (direction == 1 and not self.max()) or (direction == -1 and not self.min()):

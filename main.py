@@ -2,6 +2,7 @@ import pygame
 
 import os
 
+import saving
 import setting
 import king
 import map_setting
@@ -57,6 +58,9 @@ def main():
 
     press_start.kill()
 
+    save_control = saving.SavingController()
+    print(f'{save_control.check_save_exist()=}')
+
     # Main Menu
     positions, menu_box, arrow, arrow_group = main_menu_screen(game_screen)
     main_menu_enter = True
@@ -81,12 +85,15 @@ def main():
                     if event.key == pygame.K_RETURN:
                         select_sound.play()
                         action = option_action(setting.options[arrow.index - 1])
-                        if action == 2:
+                        if action == 1 or action == 2:
                             pygame.mixer.music.stop()
                             pygame.mixer.music.load(setting.opening_music_path)
                             pygame.mixer.music.play()
                             # New game
-                            load_save = False
+                            if action == 1:
+                                load_save = True
+                            else:
+                                load_save = False
                             logo.fade_in = False
                             logo.fade_out = True
                             menu_box.kill()
@@ -102,7 +109,7 @@ def main():
             # game_screen.fill((0, 0, 0))
             if main_menu_enter:
                 box_group.draw(game_screen)
-                main_menu_update(game_screen, menu_box, positions, arrow, arrow_group)
+                main_menu_update(game_screen, menu_box, positions, arrow, arrow_group, save_control.check_save_exist())
 
                 game_screen.blit(logo.image, logo.rect)
 
@@ -110,15 +117,57 @@ def main():
 
         pygame.display.flip()
 
-
     pygame.mixer.music.stop()
     logo.kill()
 
     # Create Character
-    if not load_save:
-        king_player = king.MainCharacter(setting.default_xy[0], setting.default_xy[1], setting.character_size, setting.maximum_height, setting.walking_speed)
+    if load_save:
+        if save_control.check_save_exist():
+            save_control.debug_save()
+            x, y, stage_no, parabola, exponential, in_ground, dropping, direction = save_control.load_save()
+            king_player = king.MainCharacter(
+                x,
+                y,
+                setting.character_size,
+                setting.maximum_height,
+                setting.walking_speed,
+                parabola,
+                exponential,
+                in_ground,
+                dropping,
+                direction
+            )
+            print(f'{stage_no=}')
+            global_var.stage_no = stage_no
+            global_var.stage_map = map_setting.Map(global_var.stage_no)
+
+    else:
+        save_control.create_save()
+        king_player = king.MainCharacter(
+            setting.default_xy[0],
+            setting.default_xy[1],
+            setting.character_size,
+            setting.maximum_height,
+            setting.walking_speed,
+            None,
+            None,
+            True,
+            False,
+            True
+        )
         global_var.stage_map = map_setting.Map(global_var.stage_no)
         king_player.init_location()
+        data = {
+            'x': king_player.rect.centerx,
+            'y': king_player.rect.centery,
+            'stage_no': global_var.stage_no,
+            'parabola': None,
+            'exponential': None,
+            'in_ground': True,
+            'dropping': False,
+            'direction': True
+        }
+        save_control.save(data)
 
     # Create Environment
 
@@ -129,19 +178,49 @@ def main():
     player.add(king_player)
 
     game_started = True
-
+    game_paused = False
+    update_map()
     while game_started:
         clock.tick(setting.FPS)
 
         # Close Window
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                # data = {
+                #     'x': king_player.rect.centerx,
+                #     'y': king_player.rect.centery,
+                #     'stage_no': global_var.stage_no,
+                #     'parabola': king_player.parabola,
+                #     'exponential': king_player.exponential,
+                #     'in_ground': king_player.in_ground,
+                #     'dropping': king_player.dropping,
+                #     'direction': king_player.right
+                # }
+                save_control.save_current_data(king_player)
                 pygame.quit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    game_paused = True
+                    # data = {
+                    #     'x': king_player.rect.centerx,
+                    #     'y': king_player.rect.centery,
+                    #     'stage_no': global_var.stage_no,
+                    #     'parabola': king_player.parabola,
+                    #     'exponential': king_player.exponential,
+                    #     'in_ground': king_player.in_ground,
+                    #     'dropping': king_player.dropping,
+                    #     'direction': king_player.right
+                    # }
+                    # save_control.save(data)
+                    # save_control.save_current_data(king_player)
+                    # pygame.quit()
+                    while game_paused:
+                        # pygame.draw.rect(game_screen, ())
+                        pass
 
 
         # Update
         player.update()
-
 
         # Background
         backdropbox = game_screen.get_rect()
@@ -177,22 +256,23 @@ def main_menu_screen(screen):
 
     positions = [seperate * option_index + starting_point for option_index in range(len(setting.options))]
 
-    arrow = main_menu.Arrow(menu_box1.rect.x + 50, positions[0], positions)
+    arrow = main_menu.Arrow(menu_box1.rect.x + 50, positions[0], (30, 30), positions, len(setting.options))
     arrow_group = pygame.sprite.Group()
     arrow_group.add(arrow)
-    # arrow_group.draw(screen)
 
     return positions, menu_box1, arrow, arrow_group
 
 
-def main_menu_update(screen, menu_box, positions, arrow, arrow_group):
-
+def main_menu_update(screen, menu_box, positions, arrow, arrow_group, have_save):
 
     arrow_group.draw(screen)
 
     font = global_var.font1
     for option_index, option in enumerate(setting.options):
-        text = font.render(option, True, (255, 255, 255))
+        if option_index == 0 and not have_save:
+            text = font.render(option, True, (161, 162, 177))
+        else:
+            text = font.render(option, True, (255, 255, 255))
         text_rect = text.get_rect(center=(0, positions[option_index]))
         text_rect.x = menu_box.rect.x + 50
         if arrow.index - 1 == option_index:
@@ -261,7 +341,6 @@ def welcome_screen(clock, screen, logo):
         if frame_count == duration:
             break
         pygame.display.flip()
-
 
 if __name__ == '__main__':
     main()

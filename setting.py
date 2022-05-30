@@ -74,3 +74,7 @@ option4 = '退出'
 main_menu_box_xy = (300, 500)
 main_menu_box_size = (200, 300)
 welcome_message = '傳說頂層有個辣妹 佢叫mingming....'
+
+# Saving
+save_data_path = "save_data"
+

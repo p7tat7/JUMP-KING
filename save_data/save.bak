@@ -1,0 +1,8 @@
+'x', (0, 6)
+'y', (512, 6)
+'stage_no', (1024, 5)
+'parabola', (1536, 4)
+'exponential', (2048, 4)
+'in_ground', (2560, 4)
+'dropping', (3072, 4)
+'direction', (3584, 4)

@@ -106,7 +106,7 @@ class Parabola():
         return (self.current_x * temp_direction > 0)
 
 class MainCharacter(pygame.sprite.Sprite):
-    def __init__(self, x, y, size, jump_h, walk_s):
+    def __init__(self, x, y, size, jump_h, walk_s, parabola, exponential, in_ground, dropping, direction):
         pygame.sprite.Sprite.__init__(self)
 
         # index 0 = last frame, index 1 = current frame
@@ -149,19 +149,19 @@ class MainCharacter(pygame.sprite.Sprite):
         self.speed = walk_s
         self.jump_h = jump_h
 
-        self.left = False
+        self.left = not direction
         self.right = True
         self.moving = False
-        self.in_ground = True
-        self.charging = False
+        self.in_ground = in_ground
+        self.charging = dropping
         # self.dropping = False
 
         # for jumping
         self.jumped = False
         # self.jumpCount = 0
-        self.parabola = None
+        self.parabola = parabola
 
-        self.exponential = None
+        self.exponential = exponential
         self.drop_height = 0
         self.drop_freeze = False
         self.drop_freeze_frame = 0
