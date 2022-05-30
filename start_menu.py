@@ -2,6 +2,7 @@ import os
 import pygame
 from pygame import mixer
 
+import global_var
 import setting
 
 class Logo(pygame.sprite.Sprite):
@@ -72,7 +73,8 @@ class Logo(pygame.sprite.Sprite):
             self.shake_count = 0
             self.shaked += 1
             if self.shaked == 1:
-                mixer.Sound.play(self.title_hit_sound)
+                if global_var.sfx_on:
+                    mixer.Sound.play(self.title_hit_sound)
 
 class PressStart(pygame.sprite.Sprite):
     def __init__(self):

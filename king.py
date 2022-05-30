@@ -311,7 +311,8 @@ class MainCharacter(pygame.sprite.Sprite):
                         height = self.jump_h
                     # print("\n\n\n")
                     # print(f"jump ({direction=} {height=})")  # DEBUG
-                    pygame.mixer.Sound.play(self.jump_sound)
+                    if global_var.sfx_on:
+                        pygame.mixer.Sound.play(self.jump_sound)
 
                     # pygame.mixer.music.stop()
                     self.parabola = Parabola(height, direction, self.rect.x, self.rect.y)
@@ -390,8 +391,9 @@ class MainCharacter(pygame.sprite.Sprite):
             # print(f'{top_hit=} {bottom_hit=} {left_hit=} {right_hit=}')
 
             if left_hit != right_hit:
-                pygame.mixer.Sound.play(self.hit_wall_sound)
-                pygame.mixer.music.stop()
+                if global_var.sfx_on:
+                    pygame.mixer.Sound.play(self.hit_wall_sound)
+                # pygame.mixer.music.stop()
                 difference = abs(self.rect.x - round(x))
                 if self.parabola != None:
                     self.parabola.current_x -= difference * direction
@@ -406,8 +408,9 @@ class MainCharacter(pygame.sprite.Sprite):
                 break
 
             if top_hit:
-                pygame.mixer.Sound.play(self.hit_wall_sound)
-                pygame.mixer.music.stop()
+                if global_var.sfx_on:
+                    pygame.mixer.Sound.play(self.hit_wall_sound)
+                # pygame.mixer.music.stop()
                 if self.parabola != None:
                     self.parabola.current_x *= -1
                     self.parabola.ori_x = self.rect.x
@@ -420,13 +423,15 @@ class MainCharacter(pygame.sprite.Sprite):
                 self.exponential = None
 
                 if self.drop_height >= setting.drop_png_height:
-                    pygame.mixer.Sound.play(self.drop_sound)
-                    pygame.mixer.music.stop()
+                    if global_var.sfx_on:
+                              pygame.mixer.Sound.play(self.drop_sound)
+                    # pygame.mixer.music.stop()
                     self.image = pygame.transform.flip(self.drop_images[0], self.right, False)
                     self.drop_freeze = True
                 else:
-                    pygame.mixer.Sound.play(self.land_sound)
-                    pygame.mixer.music.stop()
+                    if global_var.sfx_on:
+                        pygame.mixer.Sound.play(self.land_sound)
+                    # pygame.mixer.music.stop()
 
                 self.drop_height = 0
                 # self.jumpCount = 0

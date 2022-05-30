@@ -17,3 +17,8 @@ foreground = pygame.transform.scale(foreground, setting.screen_size)
 pygame.init()
 font1 = pygame.font.Font(setting.SourceHanSansCN, 25)
 font2 = pygame.font.Font(setting.SourceHanSansCN_normal, 2)
+
+# Sound Setting
+music_on = False
+sfx_on = False
+environment_on = True

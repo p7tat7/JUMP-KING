@@ -78,3 +78,11 @@ welcome_message = '傳說頂層有個辣妹 佢叫mingming....'
 # Saving
 save_data_path = "save_data"
 
+# Game menu
+ingame_options = ['繼續', '選項', '保存並退出', '放棄']
+ingame_option1 = '繼續'
+ingame_option2 = '選項'
+ingame_option3 = '保存並退出'
+ingame_option4 = '放棄'
+
+

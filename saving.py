@@ -22,7 +22,7 @@ class SavingController:
     def save(self, data_set):
         save_file = shelve.open(self.save_path, writeback=True)
         for key, data in data_set.items():
-            print(f'{key=} {data=}')
+            # print(f'{key=} {data=}')
             save_file[key] = data
         save_file.close()
         return save_file
