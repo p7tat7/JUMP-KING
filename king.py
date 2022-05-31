@@ -39,6 +39,7 @@ class Exponential():
 # y = -1/jump_variable (x)^2 + jump_height
 class Parabola():
     def __init__(self, height, direction, ori_x, ori_y):
+        self.jump_nerf = 1
         self.changed_direction = False
         self.jump_height = height
         # x-intercept
@@ -57,6 +58,9 @@ class Parabola():
 
         self.direction = direction
 
+
+        self.wall_speed = 1
+
     def get_direction(self):
         return self.direction
 
@@ -65,8 +69,10 @@ class Parabola():
         temp_direction = self.direction
         if self.direction == 0:
             temp_direction = 1
-
-        dist = temp_direction * setting.jumping_px_per_frame
+        if self.jump_nerf == 1:
+            dist = temp_direction * setting.jumping_px_per_frame
+        else:
+            dist = temp_direction * self.wall_speed
         self.current_x += dist
         add_x = self.current_x - self.starting_point_x
         add_y = self.get_current_y() - self.starting_point_y
@@ -83,19 +89,39 @@ class Parabola():
         self.current_x -= dist * temp_direction
 
     def change_direction(self, x, y):
+        if self.jump_nerf == 1:
+            temp_y = self.get_current_y()
+            temp_x = self.current_x
+            temp_x_intercept = self.get_x_intercept()[1]
+            self.jump_nerf = 0.15
 
-        self.changed_direction = True
-        self.current_x *= -1
-        self.direction *= -1
-        self.ori_x = x
-        self.starting_point_x = self.current_x
+            print(f'{temp_x_intercept=}')
 
+            self.current_x = self.get_x(temp_y)
+            if temp_x >= 0:
+                self.current_x *= -1
+            self.direction *= -1
+            self.ori_x = x
+            self.starting_point_x = self.current_x
+            self.changed_direction = True
+            self.wall_speed = self.get_x_intercept()[1] / (temp_x_intercept / setting.jumping_px_per_frame)
+            print(f'{self.get_x_intercept()[1]=}')
+            print(self.wall_speed)
+        else:
+            self.changed_direction = True
+            self.current_x *= -1
+            self.direction *= -1
+            self.ori_x = x
+            self.starting_point_x = self.current_x
+
+    def get_x(self, y):
+        return math.sqrt((y - self.jump_height) * -setting.jumping_variable * self.jump_nerf)
 
     def get_current_y(self):
-        return -1/(setting.jumping_variable) * self.current_x ** 2 + self.jump_height
+        return -1/(setting.jumping_variable * self.jump_nerf) * self.current_x ** 2 + self.jump_height
 
     def get_x_intercept(self):
-        intercept = math.sqrt(self.jump_height * setting.jumping_variable)
+        intercept = math.sqrt(self.jump_height * setting.jumping_variable * self.jump_nerf)
         return -intercept, intercept
 
     def dropping(self):
