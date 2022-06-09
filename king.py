@@ -249,6 +249,33 @@ class MainCharacter(pygame.sprite.Sprite):
                 if self.rect.y > save_y:
                     self.drop_height += self.rect.y - save_y
 
+        elif self.on_yellow() != None and not self.on_ground():
+            # sliding
+            self.parabola = None
+            self.dropping = False
+            self.exponential = None
+
+            # TODO: change character PNG
+            self.image = pygame.transform.flip(self.idle_images[0], self.left, False)
+
+            self.left = self.on_yellow() == 1
+            self.right = self.on_yellow() == 0
+
+            if self.left:
+                # left
+                self.rect.x -= 10
+                self.rect.y += 10
+                if self.on_yellow() == None and not self.on_ground():
+                    self.rect.y += 1
+            else:
+                # right
+                self.rect.x += 10
+                self.rect.y += 10
+                if self.on_yellow() == None and not self.on_ground():
+                    self.rect.y += 1
+            return
+
+
         elif not self.on_ground() and self.parabola == None and not self.dropping:
             # TODO: droping without jumping
             if self.right:
@@ -600,3 +627,19 @@ class MainCharacter(pygame.sprite.Sprite):
             if map_data[y][x] == 'X':
                 return True
         return False
+
+    def on_yellow(self):
+        max_y = setting.screen_size[1]
+        min_y = 0
+        map_data = global_var.stage_map.get_map_data()
+        y = self.rect.bottom + 1
+        if y < min_y or y > max_y:
+            return None
+        try:
+            if map_data[y][self.rect.left+1] == 'O':
+                return 0
+            if map_data[y][self.rect.right] == 'O':
+                return 1
+        except:
+            return None
+        return None
