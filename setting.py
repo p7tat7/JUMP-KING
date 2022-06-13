@@ -40,7 +40,8 @@ menu_open_path = os.path.join(sfx_path, "menu_open.wav")
 select_path = os.path.join(sfx_path, "selectA.wav")
 
 # Character Settings
-default_xy = (500, 865)
+#default_xy = (500, 865)
+default_xy = (423, 599)
 frame_rate = 100
 character_size = [70, 80]
 walking_speed = 5

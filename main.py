@@ -273,11 +273,19 @@ def main():
 
 
 def update_map():
-    global_var.background = pygame.image.load(os.path.join(setting.background_path, f"bg{global_var.stage_no}.png"))
-    global_var.background = pygame.transform.scale(global_var.background, setting.screen_size)
+    try:
+        global_var.background = pygame.image.load(os.path.join(setting.background_path, f"bg{global_var.stage_no}.png"))
+        global_var.background = pygame.transform.scale(global_var.background, setting.screen_size)
+    except:
+        pass
+
     global_var.backdrop = pygame.image.load(os.path.join(setting.stage_images_path, f"{global_var.stage_no}.png"))
-    global_var.foreground = pygame.image.load(os.path.join(setting.foreground_path, f"fg{global_var.stage_no}.png"))
-    global_var.foreground = pygame.transform.scale(global_var.foreground, setting.screen_size)
+
+    try:
+        global_var.foreground = pygame.image.load(os.path.join(setting.foreground_path, f"fg{global_var.stage_no}.png"))
+        global_var.foreground = pygame.transform.scale(global_var.foreground, setting.screen_size)
+    except:
+        pass
 
 
 def main_menu_screen(screen):
