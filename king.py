@@ -264,13 +264,13 @@ class MainCharacter(pygame.sprite.Sprite):
             if self.left:
                 # left
                 self.rect.x -= 10
-                self.rect.y += 10
+                self.rect.y += 11
                 if self.on_yellow() == None and not self.on_ground():
                     self.rect.y += 1
             else:
                 # right
                 self.rect.x += 10
-                self.rect.y += 10
+                self.rect.y += 11
                 if self.on_yellow() == None and not self.on_ground():
                     self.rect.y += 1
             return
