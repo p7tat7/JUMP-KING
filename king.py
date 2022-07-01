@@ -66,9 +66,8 @@ class Parabola():
 
     # find next position
     def next_position(self):
-        temp_direction = self.direction
-        if self.direction == 0:
-            temp_direction = 1
+        temp_direction = 1 if self.direction == 0 else self.direction
+        
         if self.jump_nerf == 1:
             dist = temp_direction * setting.jumping_px_per_frame
         else:
@@ -83,9 +82,7 @@ class Parabola():
             return self.ori_x, self.ori_y - add_y, self.direction
 
     def return_back(self, dist):
-        temp_direction = self.direction
-        if self.direction == 0:
-            temp_direction = 1
+        temp_direction = 1 if self.direction == 0 else self.direction
         self.current_x -= dist * temp_direction
 
     def change_direction(self, x, y):
@@ -125,10 +122,7 @@ class Parabola():
         return -intercept, intercept
 
     def dropping(self):
-        temp_direction = self.direction
-        if self.direction == 0:
-            temp_direction = 1
-
+        temp_direction = 1 if self.direction == 0 else self.direction
         return (self.current_x * temp_direction > 0)
 
 class MainCharacter(pygame.sprite.Sprite):
@@ -229,6 +223,8 @@ class MainCharacter(pygame.sprite.Sprite):
 
         if self.on_yellow() != None:
             # sliding
+            on_yellow = self.on_yellow()
+
             self.parabola = None
             self.dropping = False
             self.exponential = None
@@ -236,8 +232,8 @@ class MainCharacter(pygame.sprite.Sprite):
             # TODO: change character PNG
             self.image = pygame.transform.flip(self.idle_images[0], self.left, False)
 
-            self.left = self.on_yellow() == 1
-            self.right = self.on_yellow() == 0
+            self.left = on_yellow == 1
+            self.right = on_yellow == 0
 
             if self.left:
                 # left
@@ -415,6 +411,7 @@ class MainCharacter(pygame.sprite.Sprite):
             if self.rect.x == round(x) and self.rect.y == round(y):
                 break
 
+            """
             if direction == 1:
                 right = 1
                 left = 0
@@ -424,7 +421,11 @@ class MainCharacter(pygame.sprite.Sprite):
             else:
                 left = 0
                 right = 0
+            """
+            right = 1 if direction == 1 else 0
+            left = 1 if direction == -1 else 0
 
+            """
             if add == 1:
                 top = 0
                 bottom = 1
@@ -434,6 +435,9 @@ class MainCharacter(pygame.sprite.Sprite):
             else:
                 top = 0
                 bottom = 0
+            """
+            bottom = 1 if add == 1 else 0
+            top = 1 if add == -1 else 0
 
             # print(f'{top=} {bottom=} {left=} {right=}')
             top_hit, bottom_hit, left_hit, right_hit = self.detect_next(rangeX, rangeY, top, bottom, left, right)
@@ -510,7 +514,6 @@ class MainCharacter(pygame.sprite.Sprite):
         map_data = global_var.stage_map.get_map_data()
 
         for x_coor in range(self.rect.left + 5, self.rect.right - 5):
-
             if map_data[y_coor][x_coor] == 'X':
                 self.temp_floor_y = y_coor
                 return True
@@ -565,7 +568,6 @@ class MainCharacter(pygame.sprite.Sprite):
                     # break
                     continue
                 if map_data[y_coor][x_coor] == 'X':
-
                     top_hit = True
                     break
 
