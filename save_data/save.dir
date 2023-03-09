@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 'x', (0, 6)
 'y', (512, 6)
 'stage_no', (1024, 5)
@@ -6,3 +7,13 @@
 'in_ground', (2560, 4)
 'dropping', (3072, 4)
 'direction', (3584, 4)
+=======
+'x', (0, 5)
+'y', (512, 15)
+'stage_no', (1024, 5)
+'parabola', (1536, 4)
+'exponential', (2048, 4)
+'in_ground', (2560, 4)
+'dropping', (3072, 4)
+'direction', (3584, 4)
+>>>>>>> refs/remotes/origin/main

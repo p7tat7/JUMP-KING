@@ -66,9 +66,8 @@ class Parabola():
 
     # find next position
     def next_position(self):
-        temp_direction = self.direction
-        if self.direction == 0:
-            temp_direction = 1
+        temp_direction = 1 if self.direction == 0 else self.direction
+        
         if self.jump_nerf == 1:
             dist = temp_direction * setting.jumping_px_per_frame
         else:
@@ -83,9 +82,7 @@ class Parabola():
             return self.ori_x, self.ori_y - add_y, self.direction
 
     def return_back(self, dist):
-        temp_direction = self.direction
-        if self.direction == 0:
-            temp_direction = 1
+        temp_direction = 1 if self.direction == 0 else self.direction
         self.current_x -= dist * temp_direction
 
     def change_direction(self, x, y):
@@ -125,10 +122,7 @@ class Parabola():
         return -intercept, intercept
 
     def dropping(self):
-        temp_direction = self.direction
-        if self.direction == 0:
-            temp_direction = 1
-
+        temp_direction = 1 if self.direction == 0 else self.direction
         return (self.current_x * temp_direction > 0)
 
 class MainCharacter(pygame.sprite.Sprite):
@@ -227,30 +221,10 @@ class MainCharacter(pygame.sprite.Sprite):
                 self.drop_freeze_frame = 0
             return
 
-        if not self.in_ground and self.parabola != None:
-            # jumping
-
-            # self.jumpCount += 1
-
-            if self.parabola != None:
-
-                if self.parabola.changed_direction:
-                    self.image = pygame.transform.flip(self.jump_images[3], self.right, False)
-                else:
-                    if self.parabola.dropping():
-                        self.image = pygame.transform.flip(self.jump_images[2], self.left, False)
-                    else:
-                        self.image = pygame.transform.flip(self.jump_images[1], self.left, False)
-
-                # find next position
-                x, y, direction = self.parabola.next_position()
-                save_y = self.rect.y
-                self.move_position(x, y, direction)
-                if self.rect.y > save_y:
-                    self.drop_height += self.rect.y - save_y
-
-        elif self.on_yellow() != None and not self.on_ground():
+        if self.on_yellow() != None:
             # sliding
+            on_yellow = self.on_yellow()
+
             self.parabola = None
             self.dropping = False
             self.exponential = None
@@ -258,22 +232,41 @@ class MainCharacter(pygame.sprite.Sprite):
             # TODO: change character PNG
             self.image = pygame.transform.flip(self.idle_images[0], self.left, False)
 
-            self.left = self.on_yellow() == 1
-            self.right = self.on_yellow() == 0
+            self.left = on_yellow == 1
+            self.right = on_yellow == 0
 
             if self.left:
                 # left
                 self.rect.x -= 10
-                self.rect.y += 10
+                self.rect.y += 11
                 if self.on_yellow() == None and not self.on_ground():
                     self.rect.y += 1
             else:
                 # right
                 self.rect.x += 10
-                self.rect.y += 10
+                self.rect.y += 11
                 if self.on_yellow() == None and not self.on_ground():
                     self.rect.y += 1
             return
+
+        elif not self.in_ground and self.parabola != None:
+            # jumping
+
+            # self.jumpCount += 1
+            if self.parabola.changed_direction:
+                self.image = pygame.transform.flip(self.jump_images[3], self.right, False)
+            else:
+                if self.parabola.dropping():
+                    self.image = pygame.transform.flip(self.jump_images[2], self.left, False)
+                else:
+                    self.image = pygame.transform.flip(self.jump_images[1], self.left, False)
+
+            # find next position
+            x, y, direction = self.parabola.next_position()
+            save_y = self.rect.y
+            self.move_position(x, y, direction)
+            if self.rect.y > save_y:
+                self.drop_height += self.rect.y - save_y
 
 
         elif not self.on_ground() and self.parabola == None and not self.dropping:
@@ -286,7 +279,7 @@ class MainCharacter(pygame.sprite.Sprite):
             self.dropping = True
 
 
-        if self.exponential != None and self.dropping:
+        elif self.exponential != None and self.dropping:
             self.image = pygame.transform.flip(self.jump_images[2], self.left, False)
             x, y, direction = self.exponential.next_position()
             # print(f'{x=} {y=} {direction=}')
@@ -409,7 +402,6 @@ class MainCharacter(pygame.sprite.Sprite):
             add = 0
 
         while 1:
-
             rangeX = range(self.rect.left + direction + 1, self.rect.right + direction - 1)
             # print(f'{self.rect.x=} {self.rect.y=} {self.rect.left=} {self.rect.right=} {direction=}')
             rangeY = range(self.rect.top + add + 1, self.rect.bottom + add - 1)
@@ -419,6 +411,7 @@ class MainCharacter(pygame.sprite.Sprite):
             if self.rect.x == round(x) and self.rect.y == round(y):
                 break
 
+            """
             if direction == 1:
                 right = 1
                 left = 0
@@ -428,7 +421,11 @@ class MainCharacter(pygame.sprite.Sprite):
             else:
                 left = 0
                 right = 0
+            """
+            right = 1 if direction == 1 else 0
+            left = 1 if direction == -1 else 0
 
+            """
             if add == 1:
                 top = 0
                 bottom = 1
@@ -438,6 +435,9 @@ class MainCharacter(pygame.sprite.Sprite):
             else:
                 top = 0
                 bottom = 0
+            """
+            bottom = 1 if add == 1 else 0
+            top = 1 if add == -1 else 0
 
             # print(f'{top=} {bottom=} {left=} {right=}')
             top_hit, bottom_hit, left_hit, right_hit = self.detect_next(rangeX, rangeY, top, bottom, left, right)
@@ -514,7 +514,6 @@ class MainCharacter(pygame.sprite.Sprite):
         map_data = global_var.stage_map.get_map_data()
 
         for x_coor in range(self.rect.left + 5, self.rect.right - 5):
-
             if map_data[y_coor][x_coor] == 'X':
                 self.temp_floor_y = y_coor
                 return True
@@ -569,7 +568,6 @@ class MainCharacter(pygame.sprite.Sprite):
                     # break
                     continue
                 if map_data[y_coor][x_coor] == 'X':
-
                     top_hit = True
                     break
 
@@ -586,6 +584,9 @@ class MainCharacter(pygame.sprite.Sprite):
                 if map_data[y_coor][x_coor] == 'X':
                     bottom_hit = True
                     break
+                if map_data[y_coor][x_coor] == 'O':
+                    bottom_hit = True
+                    break
 
         # if yleft == 1:
         x_coor = x_range[0]
@@ -600,6 +601,9 @@ class MainCharacter(pygame.sprite.Sprite):
                 if map_data[y_coor][x_coor] == 'X':
                     left_hit = True
                     break
+                if map_data[y_coor][x_coor] == 'O':
+                    left_hit = True
+                    break
         # elif yright == 1:
         x_coor = x_range[-1]
         if x_coor >= max_x-1:
@@ -611,6 +615,9 @@ class MainCharacter(pygame.sprite.Sprite):
                     #break
                     continue
                 if map_data[y_coor][x_coor] == 'X':
+                    right_hit = True
+                    break
+                if map_data[y_coor][x_coor] == 'O':
                     right_hit = True
                     break
 
@@ -636,10 +643,11 @@ class MainCharacter(pygame.sprite.Sprite):
         if y < min_y or y > max_y:
             return None
         try:
-            if map_data[y][self.rect.left+1] == 'O':
-                return 0
-            if map_data[y][self.rect.right] == 'O':
-                return 1
+            for i in range(5):
+                if map_data[y][self.rect.left+i] == 'O':
+                    return 0
+                if map_data[y][self.rect.right+1-i] == 'O':
+                    return 1
         except:
             return None
         return None
