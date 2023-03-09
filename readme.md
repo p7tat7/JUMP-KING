@@ -15,3 +15,6 @@ Description:  Player controls a king who can only jump & walk to reach the top o
 
 Created with pygame module
 
+Run The Game: 
+---------
+Open JUMPKING.exe start the game
