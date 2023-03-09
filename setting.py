@@ -40,8 +40,8 @@ menu_open_path = os.path.join(sfx_path, "menu_open.wav")
 select_path = os.path.join(sfx_path, "selectA.wav")
 
 # Character Settings
-#default_xy = (500, 865)
-default_xy = (423, 599)
+default_xy = (500, 865)
+#default_xy = (423, 599)
 frame_rate = 100
 character_size = [70, 80]
 walking_speed = 5
@@ -74,7 +74,7 @@ option3 = '選項'
 option4 = '退出'
 main_menu_box_xy = (300, 500)
 main_menu_box_size = (200, 300)
-welcome_message = '傳說頂層有個辣妹 佢叫mingming....'
+welcome_message = '傳說頂層有個辣妹....'
 
 # Saving
 save_data_path = "save_data"

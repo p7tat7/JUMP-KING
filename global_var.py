@@ -4,7 +4,7 @@ import pygame
 import setting
 
 stage_map = None
-stage_no = 7
+stage_no = 1
 GAME_TITLE = 'JUMP KING'
 
 try:
