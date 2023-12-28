@@ -18,3 +18,10 @@ Created with pygame module
 Run The Game: 
 ---------
 Open JUMPKING.exe start the game
+
+Controls:
+A - move to left
+D - move to right
+Space - Jump
+Hold A/D + Space to Jump sideways
+Hold space for longer time to jump further
