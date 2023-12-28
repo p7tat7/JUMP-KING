@@ -15,6 +15,7 @@ class SavingController:
         return os.path.exists(self.file_name)
 
     def create_save(self):
+        print(self.save_path)
         save_file = shelve.open(self.save_path)
         save_file.close()
         return save_file
